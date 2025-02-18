@@ -1,40 +1,56 @@
 package to.holepunch.bare.android
 
-import android.app.Activity
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import to.holepunch.bare.android.core.root.ContentView
+import to.holepunch.bare.kit.IPC
 import to.holepunch.bare.kit.Worklet
+import java.nio.ByteBuffer
+import java.nio.charset.Charset
+import kotlin.coroutines.resume
 
-class MainActivity : Activity() {
-  var worklet: Worklet? = null
+class MainActivity : ComponentActivity() {
+    private lateinit var ipcHandler: IPCHandler
 
-  public override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        ipcHandler = IPCHandler(this)
+        ipcHandler.initialize()
 
-    worklet = Worklet(null)
+        lifecycleScope.launch(Dispatchers.IO) {
+            ipcHandler.listenForMessages()
+        }
 
-    try {
-      worklet!!.start("/app.bundle", assets.open("app.bundle"), null)
-    } catch (e: Exception) {
-      throw RuntimeException(e)
+        setContent { MainScreen() }
     }
-  }
 
-  public override fun onPause() {
-    super.onPause()
+    public override fun onPause() {
+        super.onPause()
+        ipcHandler.onPause()
+    }
 
-    worklet!!.suspend()
-  }
+    public override fun onResume() {
+        super.onResume()
+        ipcHandler.onResume()
+    }
 
-  public override fun onResume() {
-    super.onResume()
-
-    worklet!!.resume()
-  }
-
-  public override fun onDestroy() {
-    super.onDestroy()
-
-    worklet!!.terminate()
-    worklet = null
-  }
+    public override fun onDestroy() {
+        super.onDestroy()
+        ipcHandler.onDestroy()
+    }
 }
+
+@Composable
+fun MainScreen() {
+    ContentView()
+}
+

@@ -7,3 +7,6 @@ node_modules/
 local.properties
 *.bundle
 *.zip
+.DS_Store
+.kotlin
+*.hprof
