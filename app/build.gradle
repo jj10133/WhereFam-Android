@@ -41,30 +41,27 @@ android {
 tasks.register("link", Exec) {
     workingDir ".."
 
-    commandLine([
-            "node_modules/.bin/bare-link",
-            "--target", "android-arm",
-            "--target", "android-arm64",
-            "--target", "android-ia32",
-            "--target", "android-x64",
-            "--needs", "libbare-kit.so",
-            "--out", "app/src/main/addons"
-    ])
+  commandLine([
+    "node_modules/.bin/bare-link",
+    "--preset", "android",
+    "--needs", "libbare-kit.so",
+    "--out", "app/src/main/addons"
+  ])
 }
 
-tasks.register("pack", Exec) {
-    workingDir ".."
+tasks.register("packApp", Exec) {
+  workingDir ".."
 
-    commandLine([
-            "node_modules/.bin/bare-pack",
-            "--target", "android-arm",
-            "--target", "android-arm64",
-            "--target", "android-ia32",
-            "--target", "android-x64",
-            "--linked",
-            "--out", "app/src/main/assets/app.bundle",
-            "app/src/main/js/app.js"
-    ])
+  commandLine([
+    "node_modules/.bin/bare-pack",
+    "--preset", "android",
+    "--out", "app/src/main/assets/app.bundle",
+    "app/src/main/js/app.js"
+  ])
+}
+
+tasks.register("pack") {
+  dependsOn packApp
 }
 
 preBuild.dependsOn link, pack
