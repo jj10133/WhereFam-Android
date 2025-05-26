@@ -2,6 +2,9 @@ package to.holepunch.bare.android.core.home
 
 import android.Manifest
 import android.content.Intent
+import android.graphics.Color
+import android.location.Location
+import android.location.LocationManager
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,47 +12,50 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.mapbox.maps.extension.compose.MapEffect
-import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
-import com.mapbox.maps.plugin.PuckBearing
-import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
-import com.mapbox.maps.plugin.locationcomponent.location
+import org.maplibre.android.location.modes.CameraMode
+import org.maplibre.android.location.modes.RenderMode
+import org.maplibre.android.maps.Style
+import org.ramani.compose.CameraPosition
+import org.ramani.compose.LocationStyling
+import org.ramani.compose.MapLibre
 import to.holepunch.bare.android.core.permissions.PermissionRequest
 
 
 @Composable
 @ExperimentalMaterial3Api
-fun HomeView() {
+fun HomeView(homeViewModel: HomeViewModel) {
     val permissions = arrayOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION
     )
 
-    val mapViewportState = rememberMapViewportState()
+    val cameraPosition =
+        rememberSaveable { mutableStateOf(CameraPosition(zoom = 14.0)) }
+    val userLocation = rememberSaveable { mutableStateOf(Location(LocationManager.GPS_PROVIDER)) }
+    val cameraMode = rememberSaveable { mutableIntStateOf(CameraMode.TRACKING) }
+    val renderMode = rememberSaveable { mutableIntStateOf(RenderMode.COMPASS) }
+
     var selectedOption by remember { mutableStateOf<MenuOption?>(null) }
     var bottomSheetVisible by remember { mutableStateOf(false) }
     var shouldShareLink by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var dialogInput by remember { mutableStateOf("") }
 
+    var styleUrl by homeViewModel.styleUrl
+
+
     PermissionRequest(permissions)
 
+    LaunchedEffect(Unit) {
+        homeViewModel.getMapLink()
+    }
 
     Scaffold(
         floatingActionButton = {
@@ -73,24 +79,18 @@ fun HomeView() {
         },
         floatingActionButtonPosition = FabPosition.End,
     ) { innerPadding ->
-        MapboxMap(
-            Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            mapViewportState = mapViewportState,
-            scaleBar = {},
-
-            ) {
-            MapEffect(Unit) { mapView ->
-                mapView.location.updateSettings {
-                    locationPuck = createDefault2DPuck(withBearing = true)
-                    enabled = true
-                    puckBearing = PuckBearing.COURSE
-                    puckBearingEnabled = true
-                }
-                mapViewportState.transitionToFollowPuckState()
-            }
-        }
+        MapLibre(
+            modifier = Modifier.padding(innerPadding),
+            styleBuilder = Style.Builder().fromUri(styleUrl),
+            cameraPosition = cameraPosition.value,
+            locationStyling = LocationStyling(
+                enablePulse = true,
+                pulseColor = Color.BLUE
+            ),
+            userLocation = userLocation,
+            cameraMode = cameraMode,
+            renderMode = renderMode.value
+        )
 
         if (bottomSheetVisible) {
             ModalBottomSheet(
@@ -114,7 +114,7 @@ fun HomeView() {
                                 )
                             }
 
-                            MenuOption.ShareID -> ShareIDView()
+                            MenuOption.ShareID -> ShareIDView(homeViewModel)
                             MenuOption.ProvideFeedback -> ProvideFeedbackView()
                             else -> {}
                         }
