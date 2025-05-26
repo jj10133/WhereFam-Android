@@ -2,16 +2,17 @@ plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.android"
     id "org.jetbrains.kotlin.plugin.compose"
+    id "org.jetbrains.kotlin.plugin.serialization"
 }
 
 android {
   namespace = "to.holepunch.bare.android"
-  compileSdk = 34
+  compileSdk = 35
   ndkVersion = "27.2.12479018"
 
   defaultConfig {
     applicationId = "to.holepunch.bare.android"
-    minSdk = 28
+    minSdk = 30
     targetSdk = 35
     versionCode = 1
     versionName = "1.0"
@@ -74,9 +75,6 @@ dependencies {
     implementation('androidx.compose.ui:ui:1.7.8')
     implementation('androidx.activity:activity-compose:1.10.0')
     implementation('org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0')
-    implementation('com.mapbox.maps:android:11.9.1')
-    implementation('com.mapbox.extension:maps-compose:11.9.1')
-    implementation('com.google.android.gms:play-services-location:21.3.0')
     implementation('com.google.zxing:core:3.5.3')
-
+    implementation('org.ramani-maps:ramani-maplibre:0.9.0')
 }
