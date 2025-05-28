@@ -12,34 +12,47 @@ let db = null
 const conns = []
 let mapLink = null
 
+let ipcBuffer = ''
 IPC.setEncoding('utf8');
 
 
-IPC.on('data', async (data) => {
-  try {
-    const message = JSON.parse(data)
+IPC.on('data', async (chunck) => {
+  ipcBuffer += chunck
 
-    switch (message.action) {
-      case 'start':
-        await start(message.data)
-        break
-      case 'fetchMaps':
-        await getMaps(message.data)
-        break
-      case 'requestPublicKey':
-        await getPublicKey()
-        break
-      case 'joinPeer':
-        await addPeer(message.data)
-        break
-      case 'locationUpdate':
-        await sendUserLocation(data)
-        break
-      case 'requestMapLink':
-        await getMapLink()
+  let newLineIndex
+  while ((newLineIndex = ipcBuffer.indexOf('\n')) !== -1) {
+    const line = ipcBuffer.substring(0, newLineIndex).trim() // Get one line
+    ipcBuffer = ipcBuffer.substring(newLineIndex + 1) // Remove the line from buffer
+
+    if (line.length === 0) {
+      continue // Skip empty lines
     }
-  } catch (error) {
-    console.error('Erorr handling IPC message: ', error)
+
+    try {
+      const message = JSON.parse(line)
+
+      switch (message.action) {
+        case 'start':
+          await start(message.data['path'])
+          break
+        case 'fetchMaps':
+          await getMaps(message.data['path'])
+          break
+        case 'requestPublicKey':
+          await getPublicKey()
+          break
+        case 'joinPeer':
+          await addPeer(message.data)
+          break
+        case 'locationUpdate':
+          await sendUserLocation(data)
+          break
+        case 'requestMapLink':
+          await getMapLink()
+      }
+    } catch (error) {
+      console.error('Error handling IPC message: ', error)
+    }
   }
 })
 
@@ -106,7 +119,6 @@ async function getOrCreateKeys() {
     await db.put('publicKey', b4a.toString(publicKey, 'base64'))
     await db.put('secretKey', b4a.toString(secretKey, 'base64'))
 
-    console.log'Generated new key pair.''
     return { publicKey, secretKey }  } catch (error) {
     console.error('Error retrieving or generating keys:', error)
   }
