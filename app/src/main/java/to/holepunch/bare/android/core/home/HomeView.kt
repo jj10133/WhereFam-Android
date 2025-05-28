@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.Style
@@ -54,6 +55,7 @@ fun HomeView(homeViewModel: HomeViewModel) {
     PermissionRequest(permissions)
 
     LaunchedEffect(Unit) {
+        delay(2000)
         homeViewModel.getMapLink()
     }
 
@@ -79,66 +81,69 @@ fun HomeView(homeViewModel: HomeViewModel) {
         },
         floatingActionButtonPosition = FabPosition.End,
     ) { innerPadding ->
-        MapLibre(
-            modifier = Modifier.padding(innerPadding),
-            styleBuilder = Style.Builder().fromUri(styleUrl),
-            cameraPosition = cameraPosition.value,
-            locationStyling = LocationStyling(
-                enablePulse = true,
-                pulseColor = Color.BLUE
-            ),
-            userLocation = userLocation,
-            cameraMode = cameraMode,
-            renderMode = renderMode.value
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            MapLibre(
+                modifier = Modifier.fillMaxSize(),
+                styleBuilder = Style.Builder().fromUri(styleUrl),
+                cameraPosition = cameraPosition.value,
+                locationStyling = LocationStyling(
+                    enablePulse = true,
+                    pulseColor = Color.BLUE
+                ),
+                userLocation = userLocation,
+                cameraMode = cameraMode,
+                renderMode = renderMode.value
+            )
 
-        if (bottomSheetVisible) {
-            ModalBottomSheet(
-                sheetState = rememberModalBottomSheetState(),
-                content = {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        when (selectedOption) {
-                            MenuOption.People -> {
-                                PeopleView()
+            if (bottomSheetVisible) {
+                ModalBottomSheet(
+                    sheetState = rememberModalBottomSheetState(),
+                    content = {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            when (selectedOption) {
+                                MenuOption.People -> {
+                                    PeopleView()
 
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Add",
-                                    modifier = Modifier
-                                        .padding(horizontal = 16.dp)
-                                        .size(30.dp)
-                                        .align(Alignment.TopEnd)
-                                        .clickable {
-                                            showDialog = true
-                                        }
-                                )
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = "Add",
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp)
+                                            .size(30.dp)
+                                            .align(Alignment.TopEnd)
+                                            .clickable {
+                                                showDialog = true
+                                            }
+                                    )
+                                }
+
+                                MenuOption.ShareID -> ShareIDView(homeViewModel)
+                                MenuOption.ProvideFeedback -> ProvideFeedbackView()
+                                else -> {}
                             }
-
-                            MenuOption.ShareID -> ShareIDView(homeViewModel)
-                            MenuOption.ProvideFeedback -> ProvideFeedbackView()
-                            else -> {}
                         }
+                    },
+                    onDismissRequest = { bottomSheetVisible = false }
+                )
+            }
+
+            if (showDialog) {
+                AddPeopleDialog(
+                    onConfirm = {
+                        showDialog = false
+                    },
+                    onDismiss = {
+                        showDialog = false
                     }
-                },
-                onDismissRequest = { bottomSheetVisible = false }
-            )
+                )
+            }
+
+            if (shouldShareLink) {
+                ReferView()
+                shouldShareLink = false
+            }
         }
 
-        if (showDialog) {
-            AddPeopleDialog(
-                onConfirm = {
-                    showDialog = false
-                },
-                onDismiss = {
-                    showDialog = false
-                }
-            )
-        }
-
-        if (shouldShareLink) {
-            ReferView()
-            shouldShareLink = false
-        }
     }
 }
 
