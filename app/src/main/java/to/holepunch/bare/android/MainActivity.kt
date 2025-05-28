@@ -46,20 +46,15 @@ class MainActivity : ComponentActivity() {
             throw RuntimeException(e)
         }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            // Fetch maps first
+
+        lifecycleScope.launch {
+            copyStyleFileToInternalStorage()
             homeViewModel.fetchMaps()
 
-            // Start operation should be executed after fetchMaps()
-            homeViewModel.start()
-
-            // Launch the copyStyleFileToInternalStorage concurrently with the start operation
-            val copyStyleJob = launch { copyStyleFileToInternalStorage() }
-
-            // Wait for copyStyleFileToInternalStorage to complete (since we want it to finish before UI update)
-            copyStyleJob.join()
             withContext(Dispatchers.Main) {
-                setContent { ContentView(homeViewModel) }
+                setContent {
+                    ContentView(homeViewModel)
+                }
             }
         }
     }
@@ -80,24 +75,22 @@ class MainActivity : ComponentActivity() {
         worklet = null
     }
 
-    private fun copyStyleFileToInternalStorage() {
+    private suspend fun copyStyleFileToInternalStorage() {
         val styleFile = File(filesDir, "style.json")
 
         if (!styleFile.exists()) {
-            lifecycleScope.launch {
-                try {
-                    assets.open("style.json").use { inputStream ->
-                        FileOutputStream(styleFile).use { outputStream ->
-                            inputStream.copyTo(outputStream)
-                        }
+            try {
+                assets.open("style.json").use { inputStream ->
+                    FileOutputStream(styleFile).use { outputStream ->
+                        inputStream.copyTo(outputStream)
                     }
-                    withContext(Dispatchers.Main) {
-                        Log.d("MainActivity", "style.json copied to internal storage")
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Log.e("MainActivity", "Error copying style.json: ${e.message}")
-                    }
+                }
+                withContext(Dispatchers.Main) {
+                    Log.d("MainActivity", "style.json copied to internal storage")
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e("MainActivity", "Error copying style.json: ${e.message}")
                 }
             }
         }
