@@ -9,10 +9,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.*
+import to.holepunch.bare.android.data.GenericAction
 import to.holepunch.bare.android.data_access.ipc.IPCUtils.writeAsync
 import to.holepunch.bare.android.processing.UpdateState
 import to.holepunch.bare.kit.IPC
@@ -28,40 +26,58 @@ class HomeViewModel(context: Context, private val ipc: IPC) : ViewModel(), Updat
     val styleUrl: MutableState<String> = mutableStateOf("")
 
     suspend fun start() {
-        val message = """
-        {
-            "action": "start",
-            "data": "$fileDir"
+        val dynamicData = buildJsonObject {
+            put("path", fileDir.path)
         }
-        """.trimIndent()
+        val message = GenericAction(
+            action = "start",
+            data = dynamicData
+        )
 
-        val byteBuffer = ByteBuffer.wrap(message.toByteArray(Charset.forName("UTF-8")))
+        val jsonString = Json.encodeToString(message) + "\n"
+
+        val byteBuffer = ByteBuffer.wrap(jsonString.toByteArray(Charset.forName("UTF-8")))
         ipc.writeAsync(byteBuffer)
     }
 
     suspend fun fetchMaps() {
-        val message = """
-        {
-            "action": "fetchMaps",
-            "data": "$fileDir"
+        val dynamicData = buildJsonObject {
+            put("path", fileDir.path)
         }
-        """.trimIndent()
+        val message = GenericAction(
+            action = "fetchMaps",
+            data = dynamicData
+        )
 
-        val byteBuffer = ByteBuffer.wrap(message.toByteArray(Charset.forName("UTF-8")))
+        val jsonString = Json.encodeToString(message) + "\n"
+
+        val byteBuffer = ByteBuffer.wrap(jsonString.toByteArray(Charset.forName("UTF-8")))
         ipc.writeAsync(byteBuffer)
     }
 
     suspend fun requestPublicKey() {
-        val message = "{\"action\": \"requestPublicKey\"}"
+        val dynamicData = buildJsonObject {}
+        val message = GenericAction(
+            action = "requestPublicKey",
+            data = dynamicData
+        )
 
-        val byteBuffer = ByteBuffer.wrap(message.toByteArray(Charset.forName("UTF-8")))
+        val jsonString = Json.encodeToString(message) + "\n"
+
+        val byteBuffer = ByteBuffer.wrap(jsonString.toByteArray(Charset.forName("UTF-8")))
         ipc.writeAsync(byteBuffer)
     }
 
     suspend fun getMapLink() {
-        val message = "{\"action\": \"requestMapLink\"}"
+        val dynamicData = buildJsonObject {}
+        val message = GenericAction(
+            action = "requestMapLink",
+            data = dynamicData
+        )
 
-        val byteBuffer = ByteBuffer.wrap(message.toByteArray(Charset.forName("UTF-8")))
+        val jsonString = Json.encodeToString(message) + "\n"
+
+        val byteBuffer = ByteBuffer.wrap(jsonString.toByteArray(Charset.forName("UTF-8")))
         ipc.writeAsync(byteBuffer)
     }
 
