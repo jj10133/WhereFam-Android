@@ -50,7 +50,7 @@ class LocationManager(
             val minDistance = 10f
 
             androidLocationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
+                LocationManager.NETWORK_PROVIDER,
                 updateInterval,
                 minDistance,
                 locationListener,

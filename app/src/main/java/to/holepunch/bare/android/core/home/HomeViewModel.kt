@@ -1,6 +1,7 @@
 package to.holepunch.bare.android.core.home
 
 import android.content.Context
+import android.location.Location
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -12,18 +13,22 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.*
 import to.holepunch.bare.android.data.GenericAction
 import to.holepunch.bare.android.data_access.ipc.IPCUtils.writeAsync
+import to.holepunch.bare.android.manager.LocationManager
 import to.holepunch.bare.android.processing.UpdateState
 import to.holepunch.bare.kit.IPC
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
-class HomeViewModel(context: Context, private val ipc: IPC) : ViewModel(), UpdateState {
+class HomeViewModel(context: Context, private val ipc: IPC, private val locationManager: LocationManager) : ViewModel(),
+    UpdateState {
     private val fileDir = context.filesDir
 
     val publicKey: MutableState<String> = mutableStateOf("")
 
     val styleUrl: MutableState<String> = mutableStateOf("")
+
+    val userLocation: MutableState<Location> = mutableStateOf(Location("network"))
 
     suspend fun start() {
         val dynamicData = buildJsonObject {
@@ -136,6 +141,14 @@ class HomeViewModel(context: Context, private val ipc: IPC) : ViewModel(), Updat
                 }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error updating style.json: ${e.message}")
+            }
+        }
+    }
+
+    fun getLocation() {
+        viewModelScope.launch {
+            locationManager.trackLocation().collect { location ->
+                userLocation.value = location
             }
         }
     }

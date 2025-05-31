@@ -2,8 +2,6 @@ package to.holepunch.bare.android.core.home
 
 import android.content.Intent
 import android.graphics.Color
-import android.location.Location
-import android.location.LocationManager
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,8 +32,7 @@ import to.holepunch.bare.android.core.permissions.PermissionRequest
 fun HomeView(homeViewModel: HomeViewModel = koinViewModel()) {
 
     val cameraPosition = rememberSaveable { mutableStateOf(CameraPosition(zoom = 14.0)) }
-    val userLocation = rememberSaveable { mutableStateOf(Location(LocationManager.GPS_PROVIDER)) }
-    val cameraMode = rememberSaveable { mutableIntStateOf(CameraMode.TRACKING) }
+    val cameraMode = rememberSaveable { mutableIntStateOf(CameraMode.TRACKING_GPS) }
     val renderMode = rememberSaveable { mutableIntStateOf(RenderMode.NORMAL) }
 
     var selectedOption by remember { mutableStateOf<MenuOption?>(null) }
@@ -45,6 +42,7 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel()) {
     var dialogInput by remember { mutableStateOf("") }
 
     var styleUrl by homeViewModel.styleUrl
+    val userLocation = homeViewModel.userLocation
 
 
     PermissionRequest()
@@ -52,6 +50,7 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel()) {
     LaunchedEffect(Unit) {
         delay(2000)
         homeViewModel.getMapLink()
+        homeViewModel.getLocation()
     }
 
     Scaffold(
