@@ -8,10 +8,11 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import to.holepunch.bare.android.core.home.HomeViewModel
 import to.holepunch.bare.android.core.root.ContentView
 import to.holepunch.bare.android.data_access.ipc.IPCMessageConsumer
-import to.holepunch.bare.android.manager.LocationManager
+import to.holepunch.bare.android.data_access.ipc.IPCProvider
 import to.holepunch.bare.android.processing.GenericMessageProcessor
 import to.holepunch.bare.kit.IPC
 import to.holepunch.bare.kit.Worklet
@@ -24,8 +25,7 @@ class MainActivity : ComponentActivity() {
     private var ipc: IPC? = null
     private lateinit var messageProcessor: GenericMessageProcessor
     private var ipcMessageConsumer: IPCMessageConsumer? = null
-    private lateinit var homeViewModel: HomeViewModel
-    private lateinit var locationManager: LocationManager
+    private val homeViewModel: HomeViewModel by viewModel()
 
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,8 +36,8 @@ class MainActivity : ComponentActivity() {
         try {
             worklet!!.start("/app.bundle", assets.open("app.bundle"), null)
             ipc = IPC(worklet)
-            locationManager = LocationManager(this)
-            homeViewModel = HomeViewModel(this, ipc!!)
+            IPCProvider.ipc = ipc
+
             messageProcessor = GenericMessageProcessor(homeViewModel)
             ipcMessageConsumer = IPCMessageConsumer(ipc!!, messageProcessor)
             ipcMessageConsumer?.lifecycleScope = lifecycleScope
@@ -46,14 +46,13 @@ class MainActivity : ComponentActivity() {
             throw RuntimeException(e)
         }
 
-
         lifecycleScope.launch {
             copyStyleFileToInternalStorage()
             homeViewModel.fetchMaps()
 
             withContext(Dispatchers.Main) {
                 setContent {
-                    ContentView(homeViewModel)
+                    ContentView()
                 }
             }
         }

@@ -1,6 +1,5 @@
 package to.holepunch.bare.android.core.home
 
-import android.Manifest
 import android.content.Intent
 import android.graphics.Color
 import android.location.Location
@@ -20,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import org.koin.androidx.compose.koinViewModel
 import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.Style
@@ -31,17 +31,12 @@ import to.holepunch.bare.android.core.permissions.PermissionRequest
 
 @Composable
 @ExperimentalMaterial3Api
-fun HomeView(homeViewModel: HomeViewModel) {
-    val permissions = arrayOf(
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION
-    )
+fun HomeView(homeViewModel: HomeViewModel = koinViewModel()) {
 
-    val cameraPosition =
-        rememberSaveable { mutableStateOf(CameraPosition(zoom = 14.0)) }
+    val cameraPosition = rememberSaveable { mutableStateOf(CameraPosition(zoom = 14.0)) }
     val userLocation = rememberSaveable { mutableStateOf(Location(LocationManager.GPS_PROVIDER)) }
     val cameraMode = rememberSaveable { mutableIntStateOf(CameraMode.TRACKING) }
-    val renderMode = rememberSaveable { mutableIntStateOf(RenderMode.COMPASS) }
+    val renderMode = rememberSaveable { mutableIntStateOf(RenderMode.NORMAL) }
 
     var selectedOption by remember { mutableStateOf<MenuOption?>(null) }
     var bottomSheetVisible by remember { mutableStateOf(false) }
@@ -52,7 +47,7 @@ fun HomeView(homeViewModel: HomeViewModel) {
     var styleUrl by homeViewModel.styleUrl
 
 
-    PermissionRequest(permissions)
+    PermissionRequest()
 
     LaunchedEffect(Unit) {
         delay(2000)
@@ -143,7 +138,6 @@ fun HomeView(homeViewModel: HomeViewModel) {
                 shouldShareLink = false
             }
         }
-
     }
 }
 

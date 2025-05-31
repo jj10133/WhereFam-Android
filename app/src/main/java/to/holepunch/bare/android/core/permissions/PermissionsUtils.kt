@@ -12,21 +12,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
 
 @Composable
-fun PermissionRequest(
-    permissions: Array<String>
-) {
+fun PermissionRequest() {
+    val permissions = arrayOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
 
     val context = LocalContext.current
     val activity = context as? Activity
@@ -104,7 +101,7 @@ fun PermissionDialog(
             )
         },
         text = {
-            Text(text = "Please allow us to access your location to find nearby drivers and rides")
+            Text(text = "Please allow us to access your location to find your loved ones")
         }
     )
 }

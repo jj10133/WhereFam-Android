@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.createBitmap
@@ -30,7 +31,9 @@ fun ShareIDView(homeViewModel: HomeViewModel) {
         }
     }
 
-    Column {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         qrCodeBitmap?.let {
             Image(bitmap = it, contentDescription = "Share QR Code")
         }
