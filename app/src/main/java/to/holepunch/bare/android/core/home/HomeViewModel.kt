@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.*
@@ -28,7 +29,7 @@ class HomeViewModel(context: Context, private val ipc: IPC, private val location
 
     val styleUrl: MutableState<String> = mutableStateOf("")
 
-    val userLocation: MutableState<Location> = mutableStateOf(Location("network"))
+    val userLocation: MutableState<Location> = mutableStateOf(Location("gps"))
 
     suspend fun start() {
         val dynamicData = buildJsonObject {
@@ -139,6 +140,9 @@ class HomeViewModel(context: Context, private val ipc: IPC, private val location
                 withContext(Dispatchers.Main) {
                     styleUrl.value = "file://${fileDir}/style.json"
                 }
+
+                delay(2000)
+                start()
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error updating style.json: ${e.message}")
             }
