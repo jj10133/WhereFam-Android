@@ -6,11 +6,13 @@ const Corestore = require('corestore')
 const BlobServer = require('hypercore-blob-server')
 const sodium = require('sodium-native')
 const b4a = require('b4a')
+const EventEmitter = require('bare-events')
 
 let swarm = null
 let db = null
 const conns = []
 let mapLink = null
+const emitter = new EventEmitter()
 
 let ipcBuffer = ''
 IPC.setEncoding('utf8');
@@ -30,31 +32,19 @@ IPC.on('data', async (chunck) => {
 
     try {
       const message = JSON.parse(line)
-
-      switch (message.action) {
-        case 'start':
-          await start(message.data['path'])
-          break
-        case 'fetchMaps':
-          await getMaps(message.data['path'])
-          break
-        case 'requestPublicKey':
-          await getPublicKey()
-          break
-        case 'joinPeer':
-          await addPeer(message.data)
-          break
-        case 'locationUpdate':
-          await sendUserLocation(data)
-          break
-        case 'requestMapLink':
-          await getMapLink()
-      }
+      emitter.emit(message.action, message.data)
     } catch (error) {
       console.error('Error handling IPC message: ', error)
     }
   }
 })
+
+emitter.on('start', async (data) => await start(data['path']))
+emitter.on('fetchMaps', async (data) => await getMaps(data['path']))
+emitter.on('requestPublicKey', async () => await getPublicKey())
+emitter.on('joinPeer', async (data) => await addPeer(data))
+emitter.on('locationUpdate', async (data) => await sendUserLocation(data))
+emitter.on('requestMapLink', async () => await getMapLink())
 
 async function getPublicKey() {
   const publicKeyBase64 = await db.get('publicKey')
@@ -64,8 +54,6 @@ async function getPublicKey() {
       publicKey: publicKeyBase64.value
     }
   }
-
-  console.log('Sent public key response')
 
   IPC.write(JSON.stringify(message))
 }
@@ -141,8 +129,6 @@ async function getMaps(documentsPath) {
   )
   const store = new Corestore(documentsPath + '/maps')
 
-  console.log(documentsPath)
-
   const mapSwarm = new Hyperswarm()
   mapSwarm.on('connection', (conn) => {
     store.replicate(conn)
@@ -163,7 +149,7 @@ async function getMaps(documentsPath) {
   })
 
   const topic = Hypercore.discoveryKey(key)
-  mapSwarm.join(topic, { client: true, server: false })
+  mapSwarm.join(topic)
 }
 
 async function getMapLink() {

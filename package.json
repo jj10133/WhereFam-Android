@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "b4a": "^1.6.7",
+    "bare-events": "^2.5.4",
     "corestore": "^7.4.3",
     "hyperbee": "^2.24.2",
     "hypercore": "^11.8.2",
