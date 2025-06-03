@@ -19,6 +19,6 @@ val appModule = module {
 
 val viewModel = module {
     viewModel {
-        HomeViewModel(get(), get())
+        HomeViewModel(get(), get(), get())
     }
 }

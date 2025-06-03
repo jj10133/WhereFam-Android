@@ -76,18 +76,20 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel()) {
         floatingActionButtonPosition = FabPosition.End,
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            MapLibre(
-                modifier = Modifier.fillMaxSize(),
-                styleBuilder = Style.Builder().fromUri(styleUrl),
-                cameraPosition = cameraPosition.value,
-                locationStyling = LocationStyling(
-                    enablePulse = true,
-                    pulseColor = Color.BLUE
-                ),
-                userLocation = userLocation,
-                cameraMode = cameraMode,
-                renderMode = renderMode.value
-            )
+            if (styleUrl.isNotEmpty()) {
+                MapLibre(
+                    modifier = Modifier.fillMaxSize(),
+                    styleBuilder = Style.Builder().fromUri(styleUrl),
+                    cameraPosition = cameraPosition.value,
+                    locationStyling = LocationStyling(
+                        enablePulse = true,
+                        pulseColor = Color.BLUE
+                    ),
+                    userLocation = userLocation,
+                    cameraMode = cameraMode,
+                    renderMode = renderMode.value
+                )
+            }
 
             if (bottomSheetVisible) {
                 ModalBottomSheet(
