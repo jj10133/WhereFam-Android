@@ -22,7 +22,6 @@ class LocationManager(
 
     fun getLocation(
         onSuccess: (latitude: Double, longitude: Double) -> Unit,
-        onFailure: () -> Unit = {}
     ){
         val executor = Executors.newSingleThreadExecutor()
         androidLocationManager.getCurrentLocation(
@@ -32,8 +31,6 @@ class LocationManager(
         ) { location ->
             if (location != null) {
                 onSuccess(location.latitude, location.longitude)
-            } else {
-                onFailure()
             }
         }
     }
@@ -50,7 +47,7 @@ class LocationManager(
             val minDistance = 10f
 
             androidLocationManager.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER,
+                LocationManager.GPS_PROVIDER,
                 updateInterval,
                 minDistance,
                 locationListener,

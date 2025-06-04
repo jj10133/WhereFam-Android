@@ -14,14 +14,13 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.*
 import to.holepunch.bare.android.data.GenericAction
 import to.holepunch.bare.android.data_access.ipc.IPCUtils.writeAsync
-import to.holepunch.bare.android.manager.LocationManager
 import to.holepunch.bare.android.processing.UpdateState
 import to.holepunch.bare.kit.IPC
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
-class HomeViewModel(context: Context, private val ipc: IPC, private val locationManager: LocationManager) : ViewModel(),
+class HomeViewModel(context: Context, private val ipc: IPC) : ViewModel(),
     UpdateState {
     private val fileDir = context.filesDir
 
@@ -32,13 +31,8 @@ class HomeViewModel(context: Context, private val ipc: IPC, private val location
     val userLocation: MutableState<Location> = mutableStateOf(Location("gps"))
 
     suspend fun start() {
-        val dynamicData = buildJsonObject {
-            put("path", fileDir.path)
-        }
-        val message = GenericAction(
-            action = "start",
-            data = dynamicData
-        )
+        val dynamicData = buildJsonObject { put("path", fileDir.path) }
+        val message = GenericAction(action = "start", data = dynamicData)
 
         val jsonString = Json.encodeToString(message) + "\n"
 
@@ -47,13 +41,8 @@ class HomeViewModel(context: Context, private val ipc: IPC, private val location
     }
 
     suspend fun fetchMaps() {
-        val dynamicData = buildJsonObject {
-            put("path", fileDir.path)
-        }
-        val message = GenericAction(
-            action = "fetchMaps",
-            data = dynamicData
-        )
+        val dynamicData = buildJsonObject { put("path", fileDir.path) }
+        val message = GenericAction(action = "fetchMaps", data = dynamicData)
 
         val jsonString = Json.encodeToString(message) + "\n"
 
@@ -63,10 +52,7 @@ class HomeViewModel(context: Context, private val ipc: IPC, private val location
 
     suspend fun requestPublicKey() {
         val dynamicData = buildJsonObject {}
-        val message = GenericAction(
-            action = "requestPublicKey",
-            data = dynamicData
-        )
+        val message = GenericAction(action = "requestPublicKey", data = dynamicData)
 
         val jsonString = Json.encodeToString(message) + "\n"
 
@@ -76,10 +62,7 @@ class HomeViewModel(context: Context, private val ipc: IPC, private val location
 
     suspend fun getMapLink() {
         val dynamicData = buildJsonObject {}
-        val message = GenericAction(
-            action = "requestMapLink",
-            data = dynamicData
-        )
+        val message = GenericAction(action = "requestMapLink", data = dynamicData)
 
         val jsonString = Json.encodeToString(message) + "\n"
 
@@ -117,11 +100,12 @@ class HomeViewModel(context: Context, private val ipc: IPC, private val location
                     return@launch // Exit the coroutine early
                 }
 
-                val updatedProtomaps = JsonObject(
-                    protomaps.toMutableMap().apply {
-                        put("url", JsonPrimitive("pmtiles://$url"))
-                    }
-                )
+                val updatedProtomaps =
+                    JsonObject(
+                        protomaps.toMutableMap().apply {
+                            put("url", JsonPrimitive("pmtiles://$url"))
+                        }
+                    )
 
                 val updatedSources = JsonObject(
                     sources.toMutableMap().apply {
@@ -148,13 +132,4 @@ class HomeViewModel(context: Context, private val ipc: IPC, private val location
             }
         }
     }
-
-    fun getLocation() {
-        viewModelScope.launch {
-            locationManager.trackLocation().collect { location ->
-                userLocation.value = location
-            }
-        }
-    }
 }
-

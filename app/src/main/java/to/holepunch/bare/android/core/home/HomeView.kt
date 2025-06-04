@@ -18,21 +18,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
-import org.maplibre.android.location.modes.CameraMode
+import org.koin.compose.koinInject
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.Style
 import org.ramani.compose.CameraPosition
 import org.ramani.compose.LocationStyling
 import org.ramani.compose.MapLibre
 import to.holepunch.bare.android.core.permissions.PermissionRequest
+import to.holepunch.bare.android.manager.LocationManager
 
 
 @Composable
 @ExperimentalMaterial3Api
-fun HomeView(homeViewModel: HomeViewModel = koinViewModel()) {
+fun HomeView(homeViewModel: HomeViewModel = koinViewModel(), locationManager: LocationManager = koinInject()) {
 
     val cameraPosition = rememberSaveable { mutableStateOf(CameraPosition(zoom = 14.0)) }
-    val cameraMode = rememberSaveable { mutableIntStateOf(CameraMode.TRACKING_GPS) }
     val renderMode = rememberSaveable { mutableIntStateOf(RenderMode.NORMAL) }
 
     var selectedOption by remember { mutableStateOf<MenuOption?>(null) }
@@ -42,7 +43,6 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel()) {
     var dialogInput by remember { mutableStateOf("") }
 
     var styleUrl by homeViewModel.styleUrl
-    val userLocation = homeViewModel.userLocation
 
 
     PermissionRequest()
@@ -50,7 +50,12 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel()) {
     LaunchedEffect(Unit) {
         delay(2000)
         homeViewModel.getMapLink()
-        homeViewModel.getLocation()
+        locationManager.getLocation { latitude, longitude ->
+            cameraPosition.value = CameraPosition(
+                target = LatLng(latitude, longitude),
+                zoom = 14.0
+            )
+        }
     }
 
     Scaffold(
@@ -85,8 +90,6 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel()) {
                         enablePulse = true,
                         pulseColor = Color.BLUE
                     ),
-                    userLocation = userLocation,
-                    cameraMode = cameraMode,
                     renderMode = renderMode.value
                 )
             }
