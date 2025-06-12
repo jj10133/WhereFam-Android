@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        actionBar?.hide()
 
         worklet = Worklet(null)
 
