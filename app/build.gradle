@@ -80,4 +80,5 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose-navigation:4.0.3")
     implementation("androidx.compose.foundation:foundation:1.8.2")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation "androidx.datastore:datastore-preferences:1.1.7"
 }
