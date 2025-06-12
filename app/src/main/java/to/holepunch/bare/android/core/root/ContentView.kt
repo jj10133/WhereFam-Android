@@ -1,16 +1,21 @@
 package to.holepunch.bare.android.core.root
 
-import androidx.compose.foundation.layout.Box
+import OnboardingView
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import to.holepunch.bare.android.core.home.HomeView
+import to.holepunch.bare.android.core.onboarding.FirstPageView
+import to.holepunch.bare.android.core.onboarding.SecondPageView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContentView() {
-  Box {
-      HomeView()
-  }
+
+    OnboardingView(
+        pages = listOf(
+            { FirstPageView() },
+            { SecondPageView() }
+        )
+    )
+
+//    Box { HomeView() }
 }
-
-

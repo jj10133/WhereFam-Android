@@ -1,24 +1,18 @@
 package to.holepunch.bare.android.core.onboarding
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FamilyRestroom
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import to.holepunch.bare.android.R
 
 @Composable
 fun FirstPageView() {
@@ -34,36 +28,40 @@ fun FirstPageView() {
             text = "Welcome!",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFFFFB77F), // matching the color in the Swift code
+            color = Color(0xFFFFB77F),
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
         Image(
-            painter = painterResource(id = R.drawable.round_qr_code_2_24), // replace with appropriate drawable
-            contentDescription = "Icon",
+            imageVector = Icons.Default.FamilyRestroom,
+            contentDescription = "",
+            colorFilter = ColorFilter.tint(Color(0xFFFFB77F)),
             modifier = Modifier
                 .size(200.dp)
                 .padding(bottom = 32.dp)
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(
                 text = "Stay connected with your loved ones ",
                 fontSize = 20.sp,
                 color = Color.Gray,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.weight(1f, fill = false)
             )
+
+            Spacer(modifier = Modifier.width(16.dp))
 
             Text(
                 text = "Globally, Securely and Privately.",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFFFB77F),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.weight(1f, fill = false)
             )
         }
 
