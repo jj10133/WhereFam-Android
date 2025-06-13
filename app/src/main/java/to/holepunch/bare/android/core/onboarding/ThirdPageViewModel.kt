@@ -13,52 +13,37 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import to.holepunch.bare.android.data_access.local.UserInfomation
+import to.holepunch.bare.android.data_access.local.PrefUtils
 
-class ThirdPageViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = UserInfomation(application)
+class ThirdPageViewModel(application: Application, private val prefUtils: PrefUtils) : AndroidViewModel(application) {
 
     var userImage: ImageBitmap? by mutableStateOf(null)
         private set
 
-    init {
-        viewModelScope.launch {
-            val savedImageData = repository.userImageDataFlow.firstOrNull()
-            savedImageData?.let {
-                userImage = repository.decodeBase64ToBitmap(it)
-                Log.d("ThirdPageViewModel", "Loaded image from DataStore")
-            }
-                    ?: run { Log.d("ThirdPageViewModel", "No image found in DataStore") }
-        }
-    }
-
     fun loadImageFromUri(uri: Uri?) {
         if (uri == null) {
             userImage = null
-            viewModelScope.launch { repository.saveUserImage(null) }
+            viewModelScope.launch { prefUtils.saveUserImage(null) }
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
             val contentResolver = getApplication<Application>().contentResolver
             try {
-                val bitmap: Bitmap? =
-                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, uri))
+                val bitmap: Bitmap? = ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, uri))
 
                 withContext(Dispatchers.Main) {
                     userImage = bitmap?.asImageBitmap()
                     Log.d("ThirdPageViewModel", "Image loaded from URI and saved")
                 }
 
-                repository.saveUserImage(bitmap)
+                prefUtils.saveUserImage(bitmap)
             } catch (e: Exception) {
                 Log.e("ThirdPageViewModel", "Error loading image from URI: ${e.message}", e)
                 userImage = null
-                viewModelScope.launch { repository.saveUserImage(null) }
+                viewModelScope.launch { prefUtils.saveUserImage(null) }
             }
         }
     }

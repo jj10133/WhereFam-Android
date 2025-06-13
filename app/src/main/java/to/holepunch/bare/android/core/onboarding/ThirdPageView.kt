@@ -23,19 +23,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-
+import org.koin.androidx.compose.koinViewModel
 
 val CustomOrange = Color(0xFFFFB77F)
 
 @Composable
-fun ThirdPageView(viewModel: ThirdPageViewModel = viewModel()) {
+fun ThirdPageView(viewModel: ThirdPageViewModel = koinViewModel()) {
     val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            viewModel.loadImageFromUri(uri)
-        }
-    )
+        contract = ActivityResultContracts.PickVisualMedia(), onResult = { uri -> viewModel.loadImageFromUri(uri) })
 
     Column(
         modifier = Modifier
@@ -58,17 +53,19 @@ fun ThirdPageView(viewModel: ThirdPageViewModel = viewModel()) {
                 .size(200.dp)
                 .clickable {
                     imagePickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
                     )
-                },
-            contentAlignment = Alignment.Center
+                }, contentAlignment = Alignment.Center
         ) {
             if (viewModel.userImage != null) {
                 Image(
                     bitmap = viewModel.userImage!!,
                     contentDescription = "User Avatar",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .clip(CircleShape)
                         .border(2.dp, CustomOrange, CircleShape)
                 )
@@ -78,7 +75,8 @@ fun ThirdPageView(viewModel: ThirdPageViewModel = viewModel()) {
                     contentDescription = "Placeholder Avatar",
                     colorFilter = ColorFilter.tint(CustomOrange),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize(0.8f)
+                    modifier = Modifier
+                        .fillMaxSize(0.8f)
                         .clip(CircleShape)
                         .border(2.dp, CustomOrange, CircleShape)
                 )

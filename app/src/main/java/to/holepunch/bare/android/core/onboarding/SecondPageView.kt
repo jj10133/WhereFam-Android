@@ -2,26 +2,27 @@ package to.holepunch.bare.android.core.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import to.holepunch.bare.android.data_access.local.PrefUtils
 
 @Composable
 fun SecondPageView() {
+    val prefUtils: PrefUtils = koinInject()
     var userName by rememberSaveable { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -41,7 +42,10 @@ fun SecondPageView() {
 
         OutlinedTextField(
             value = userName,
-            onValueChange = { newValue -> userName = newValue },
+            onValueChange = { newValue ->
+                userName = newValue
+                scope.launch { prefUtils.saveUserName(newValue) }
+            },
             placeholder = { Text("Enter your name", color = Color.Gray) },
             modifier = Modifier
                 .fillMaxWidth()
