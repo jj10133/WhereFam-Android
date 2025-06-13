@@ -35,7 +35,7 @@ import to.holepunch.bare.android.R
 fun ShareIDView(homeViewModel: HomeViewModel) {
     var qrCodeBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     var publicKey by homeViewModel.publicKey
-    val context = LocalContext.current  // Get the context
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         if (publicKey.isEmpty()) {
@@ -93,7 +93,6 @@ fun ShareIDView(homeViewModel: HomeViewModel) {
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Copy Button
                 IconButton(onClick = {
                     copyToClipboard(context, publicKey)
                 }) {

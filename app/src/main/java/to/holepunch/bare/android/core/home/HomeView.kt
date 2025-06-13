@@ -25,7 +25,6 @@ import org.maplibre.android.maps.Style
 import org.ramani.compose.CameraPosition
 import org.ramani.compose.LocationStyling
 import org.ramani.compose.MapLibre
-import to.holepunch.bare.android.core.permissions.PermissionRequest
 import to.holepunch.bare.android.manager.LocationManager
 
 
@@ -43,9 +42,6 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel(), locationManager: Lo
     var dialogInput by remember { mutableStateOf("") }
 
     var styleUrl by homeViewModel.styleUrl
-
-
-    PermissionRequest()
 
     LaunchedEffect(Unit) {
         delay(2000)

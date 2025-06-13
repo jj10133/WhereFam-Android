@@ -43,7 +43,7 @@ object IPCUtils {
         val writableCallback = IPC.PollCallback {
             val writtenAgain = this.write(data)
             if (writtenAgain == data.limit()) {
-                this.writable(null) // Clear the callback
+                this.writable(null)
                 continuation.resume(true)
             }
         }

@@ -87,17 +87,16 @@ class HomeViewModel(context: Context, private val ipc: IPC) : ViewModel(),
                 val styleContent = styleFile.readText()
                 val json = Json.parseToJsonElement(styleContent).jsonObject
 
-                // Use an early return here instead of inside the `apply`
                 val sources = json["sources"]?.jsonObject
                 if (sources == null) {
                     Log.e("HomeViewModel", "No 'sources' found in style.json")
-                    return@launch // Exit the coroutine early
+                    return@launch
                 }
 
                 val protomaps = sources["protomaps"]?.jsonObject
                 if (protomaps == null) {
                     Log.e("HomeViewModel", "No 'protomaps' found in style.json")
-                    return@launch // Exit the coroutine early
+                    return@launch
                 }
 
                 val updatedProtomaps =
@@ -119,7 +118,6 @@ class HomeViewModel(context: Context, private val ipc: IPC) : ViewModel(),
                     }
                 )
 
-                // Save back to file
                 styleFile.writeText(Json { prettyPrint = true }.encodeToString(JsonObject.serializer(), updatedJson))
                 withContext(Dispatchers.Main) {
                     styleUrl.value = "file://${fileDir}/style.json"
