@@ -51,9 +51,10 @@ class ThirdPageViewModel(application: Application) : AndroidViewModel(applicatio
 
                 withContext(Dispatchers.Main) {
                     userImage = bitmap?.asImageBitmap()
-                    repository.saveUserImage(bitmap)
                     Log.d("ThirdPageViewModel", "Image loaded from URI and saved")
                 }
+
+                repository.saveUserImage(bitmap)
             } catch (e: Exception) {
                 Log.e("ThirdPageViewModel", "Error loading image from URI: ${e.message}", e)
                 userImage = null
