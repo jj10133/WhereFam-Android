@@ -19,7 +19,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,10 +34,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import to.holepunch.bare.android.data_access.local.PrefUtils
 
 @Composable
 fun OnboardingView(
     pages: List<@Composable () -> Unit>,
+    prefUtils: PrefUtils = koinInject()
 ) {
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val coroutineScope = rememberCoroutineScope()
@@ -109,6 +111,10 @@ fun OnboardingView(
                 if (!isLastPage) {
                     coroutineScope.launch {
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                } else {
+                    coroutineScope.launch {
+                        prefUtils.setOnboardingCompleted(true)
                     }
                 }
             },

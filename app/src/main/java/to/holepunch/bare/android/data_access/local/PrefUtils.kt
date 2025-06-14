@@ -5,10 +5,12 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -22,6 +24,11 @@ class PrefUtils(private val context: Context) {
     companion object {
         private val USER_NAME = stringPreferencesKey("user_name")
         private const val USER_IMAGE_FILE_NAME = "user_profile_image.png"
+        private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+    }
+
+    val onboardingCompletedFlow: Flow<Boolean> = context.userPreferencesDataStore.data.map { preferences ->
+        preferences[ONBOARDING_COMPLETED] ?: false
     }
 
     suspend fun saveUserImage(bitmap: Bitmap?) {
@@ -47,5 +54,11 @@ class PrefUtils(private val context: Context) {
 
     suspend fun getUserName(): String? {
         return context.userPreferencesDataStore.data.map { it[USER_NAME] }.first()
+    }
+
+    suspend fun setOnboardingCompleted(completed: Boolean) {
+        context.userPreferencesDataStore.edit { preference ->
+            preference[ONBOARDING_COMPLETED] = completed
+        }
     }
 }
