@@ -13,9 +13,13 @@ import to.holepunch.bare.android.data_access.local.PrefUtils
 @Composable
 fun ContentView(prefUtils: PrefUtils = koinInject()) {
 
-    val onboardingCompleted by prefUtils.onboardingCompletedFlow.collectAsState(initial = false)
+    val onboardingCompleted by prefUtils.onboardingCompletedFlow.collectAsState(initial = null)
 
-    if (!onboardingCompleted) {
+    if (onboardingCompleted == null) {
+        return
+    }
+
+    if (onboardingCompleted != true) {
         OnboardingView(
             pages = listOf(
                 { FirstPageView() },
