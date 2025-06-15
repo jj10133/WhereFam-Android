@@ -1,4 +1,4 @@
-package to.holepunch.bare.android.data_access.ipc
+package to.holepunch.bare.android.data.ipc
 
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

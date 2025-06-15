@@ -1,34 +1,27 @@
-package to.holepunch.bare.android.data_access.local
+package to.holepunch.bare.android.data.local
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.core.IOException
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
-class PrefUtils(private val context: Context) {
+val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(name = "user_info")
 
-    val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(name = "user_info")
-
-    companion object {
+class DataStoreRepository(private val context: Context) {
+    private companion object {
         private val USER_NAME = stringPreferencesKey("user_name")
         private const val USER_IMAGE_FILE_NAME = "user_profile_image.png"
         private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
-    }
-
-    val onboardingCompletedFlow: Flow<Boolean> = context.userPreferencesDataStore.data.map { preferences ->
-        preferences[ONBOARDING_COMPLETED] ?: false
     }
 
     suspend fun saveUserImage(bitmap: Bitmap?) {
@@ -52,13 +45,24 @@ class PrefUtils(private val context: Context) {
         context.userPreferencesDataStore.edit { it[USER_NAME] = value }
     }
 
-    suspend fun getUserName(): String? {
-        return context.userPreferencesDataStore.data.map { it[USER_NAME] }.first()
+    suspend fun saveOnboardingState(completed: Boolean) {
+        context.userPreferencesDataStore.edit { preferences ->
+            preferences[ONBOARDING_COMPLETED] = completed
+        }
     }
 
-    suspend fun setOnboardingCompleted(completed: Boolean) {
-        context.userPreferencesDataStore.edit { preference ->
-            preference[ONBOARDING_COMPLETED] = completed
-        }
+    fun readOnBoardingState(): Flow<Boolean> {
+        return context.userPreferencesDataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { preferences ->
+                val onBoardingState = preferences[ONBOARDING_COMPLETED] ?: false
+                onBoardingState
+            }
     }
 }

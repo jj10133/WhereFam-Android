@@ -1,11 +1,11 @@
-package to.holepunch.bare.android.data_access.ipc
+package to.holepunch.bare.android.data.ipc
 
 import android.util.Log
 import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import to.holepunch.bare.android.data_access.ipc.IPCUtils.readStream
+import to.holepunch.bare.android.data.ipc.IPCUtils.readStream
 import to.holepunch.bare.android.processing.MessageProcessor
 import to.holepunch.bare.kit.IPC
 
