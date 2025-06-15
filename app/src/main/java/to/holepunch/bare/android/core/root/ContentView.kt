@@ -2,34 +2,31 @@ package to.holepunch.bare.android.core.root
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import org.koin.compose.koinInject
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import to.holepunch.bare.android.core.home.HomeView
 import to.holepunch.bare.android.core.onboarding.*
-import to.holepunch.bare.android.data_access.local.PrefUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContentView(prefUtils: PrefUtils = koinInject()) {
-
-    val onboardingCompleted by prefUtils.onboardingCompletedFlow.collectAsState(initial = null)
-
-    if (onboardingCompleted == null) {
-        return
-    }
-
-    if (onboardingCompleted != true) {
-        OnboardingView(
-            pages = listOf(
-                { FirstPageView() },
-                { SecondPageView() },
-                { ThirdPageView() },
-                { FourthPageView() },
-                { FifthPageView() }
+fun ContentView(navController: NavHostController, startDestination: String) {
+    NavHost(navController = navController, startDestination = startDestination) {
+        composable("Onboarding") {
+            OnboardingView(
+                navController,
+                pages = listOf(
+                    { FirstPageView() },
+                    { SecondPageView() },
+                    { ThirdPageView() },
+                    { FourthPageView() },
+                    { FifthPageView() }
+                )
             )
-        )
-    } else {
-        HomeView()
+        }
+
+        composable("Home") {
+            HomeView()
+        }
     }
 }

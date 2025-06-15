@@ -9,9 +9,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,10 +17,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
+import to.holepunch.bare.android.R
 
 val CustomOrange = Color(0xFFFFB77F)
 
@@ -71,7 +70,7 @@ fun ThirdPageView(viewModel: ThirdPageViewModel = koinViewModel()) {
                 )
             } else {
                 Image(
-                    imageVector = Icons.Filled.Person,
+                    painter = painterResource(id = R.drawable.baseline_person_24),
                     contentDescription = "Placeholder Avatar",
                     colorFilter = ColorFilter.tint(CustomOrange),
                     contentScale = ContentScale.Fit,
@@ -84,7 +83,7 @@ fun ThirdPageView(viewModel: ThirdPageViewModel = koinViewModel()) {
 
             if (viewModel.userImage == null) {
                 Image(
-                    imageVector = Icons.Filled.Add,
+                    painter = painterResource(id = R.drawable.baseline_add_24),
                     contentDescription = "Add photo",
                     colorFilter = ColorFilter.tint(Color.White),
                     modifier = Modifier

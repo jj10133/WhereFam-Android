@@ -2,17 +2,17 @@ package to.holepunch.bare.android.core.onboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FamilyRestroom
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import to.holepunch.bare.android.R
 
 @Composable
 fun FirstPageView() {
@@ -33,7 +33,7 @@ fun FirstPageView() {
         )
 
         Image(
-            imageVector = Icons.Default.FamilyRestroom,
+            painter = painterResource(R.drawable.outline_family_restroom_24),
             contentDescription = "",
             colorFilter = ColorFilter.tint(Color(0xFFFFB77F)),
             modifier = Modifier

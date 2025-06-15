@@ -33,14 +33,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
-import to.holepunch.bare.android.data_access.local.PrefUtils
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun OnboardingView(
+    navController: NavHostController,
     pages: List<@Composable () -> Unit>,
-    prefUtils: PrefUtils = koinInject()
+    onboardingViewModel: OnboardingViewModel = koinViewModel()
 ) {
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val coroutineScope = rememberCoroutineScope()
@@ -114,7 +115,9 @@ fun OnboardingView(
                     }
                 } else {
                     coroutineScope.launch {
-                        prefUtils.setOnboardingCompleted(true)
+                        onboardingViewModel.saveOnboardingState(completed = true)
+                        navController.popBackStack()
+                        navController.navigate("Home")
                     }
                 }
             },

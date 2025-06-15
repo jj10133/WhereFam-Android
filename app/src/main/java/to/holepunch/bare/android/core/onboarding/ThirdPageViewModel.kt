@@ -1,6 +1,6 @@
 package to.holepunch.bare.android.core.onboarding
 
-import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -10,15 +10,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import to.holepunch.bare.android.data_access.local.PrefUtils
+import to.holepunch.bare.android.data.local.DataStoreRepository
 
-class ThirdPageViewModel(application: Application, private val prefUtils: PrefUtils) : AndroidViewModel(application) {
+class ThirdPageViewModel(context: Context, private val prefUtils: DataStoreRepository) : ViewModel() {
 
+    private val contentResolver = context.contentResolver
     var userImage: ImageBitmap? by mutableStateOf(null)
         private set
 
@@ -30,7 +31,6 @@ class ThirdPageViewModel(application: Application, private val prefUtils: PrefUt
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val contentResolver = getApplication<Application>().contentResolver
             try {
                 val bitmap: Bitmap? = ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, uri))
 

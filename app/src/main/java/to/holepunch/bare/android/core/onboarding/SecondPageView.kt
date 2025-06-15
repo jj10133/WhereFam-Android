@@ -16,11 +16,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import to.holepunch.bare.android.data_access.local.PrefUtils
+import to.holepunch.bare.android.data.local.DataStoreRepository
 
 @Composable
 fun SecondPageView() {
-    val prefUtils: PrefUtils = koinInject()
+    val prefUtils: DataStoreRepository = koinInject()
     var userName by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
