@@ -28,7 +28,7 @@
     "corestore": "^7.4.3",
     "hyperbee": "^2.24.2",
     "hypercore": "^11.8.2",
-    "hypercore-blob-server": "^1.9.1",
+    "hypercore-blob-server": "^1.10.0",
     "hyperswarm": "^4.11.7",
     "sodium-native": "^5.0.4"
   },
