@@ -2,21 +2,16 @@ package to.holepunch.bare.android.core.home
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import to.holepunch.bare.android.data.GenericAction
-import to.holepunch.bare.android.data_access.ipc.IPCUtils.writeAsync
+import to.holepunch.bare.android.data.ipc.IPCUtils.writeAsync
 import to.holepunch.bare.android.processing.UpdateState
 import to.holepunch.bare.kit.IPC
-import java.io.File
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
@@ -60,74 +55,7 @@ class HomeViewModel(context: Context, private val ipc: IPC) : ViewModel(),
         ipc.writeAsync(byteBuffer)
     }
 
-    suspend fun getMapLink() {
-        val dynamicData = buildJsonObject {}
-        val message = GenericAction(action = "requestMapLink", data = dynamicData)
-
-        val jsonString = Json.encodeToString(message) + "\n"
-
-        val byteBuffer = ByteBuffer.wrap(jsonString.toByteArray(Charset.forName("UTF-8")))
-        ipc.writeAsync(byteBuffer)
-    }
-
     override fun setPublicKey(key: String) {
         publicKey.value = key
-    }
-
-    override fun setStyleUrl(url: String) {
-        val styleFile = File(fileDir, "style.json")
-
-        if (!styleFile.exists()) {
-            Log.e("HomeViewModel", "style.json not found.")
-            return
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val styleContent = styleFile.readText()
-                val json = Json.parseToJsonElement(styleContent).jsonObject
-
-                val sources = json["sources"]?.jsonObject
-                if (sources == null) {
-                    Log.e("HomeViewModel", "No 'sources' found in style.json")
-                    return@launch
-                }
-
-                val protomaps = sources["protomaps"]?.jsonObject
-                if (protomaps == null) {
-                    Log.e("HomeViewModel", "No 'protomaps' found in style.json")
-                    return@launch
-                }
-
-                val updatedProtomaps =
-                    JsonObject(
-                        protomaps.toMutableMap().apply {
-                            put("url", JsonPrimitive("pmtiles://$url"))
-                        }
-                    )
-
-                val updatedSources = JsonObject(
-                    sources.toMutableMap().apply {
-                        put("protomaps", updatedProtomaps)
-                    }
-                )
-
-                val updatedJson = JsonObject(
-                    json.toMutableMap().toMutableMap().apply {
-                        put("sources", updatedSources)
-                    }
-                )
-
-                styleFile.writeText(Json { prettyPrint = true }.encodeToString(JsonObject.serializer(), updatedJson))
-                withContext(Dispatchers.Main) {
-                    styleUrl.value = "file://${fileDir}/style.json"
-                }
-
-                delay(2000)
-                start()
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Error updating style.json: ${e.message}")
-            }
-        }
     }
 }

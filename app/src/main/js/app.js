@@ -15,8 +15,7 @@ let mapLink = null
 const emitter = new EventEmitter()
 
 let ipcBuffer = ''
-IPC.setEncoding('utf8');
-
+IPC.setEncoding('utf8')
 
 IPC.on('data', async (chunck) => {
   ipcBuffer += chunck
@@ -44,7 +43,6 @@ emitter.on('fetchMaps', async (data) => await getMaps(data['path']))
 emitter.on('requestPublicKey', async () => await getPublicKey())
 emitter.on('joinPeer', async (data) => await addPeer(data))
 emitter.on('locationUpdate', async (data) => await sendUserLocation(data))
-emitter.on('requestMapLink', async () => await getMapLink())
 
 async function getPublicKey() {
   const publicKeyBase64 = await db.get('publicKey')
@@ -107,18 +105,19 @@ async function getOrCreateKeys() {
     await db.put('publicKey', b4a.toString(publicKey, 'base64'))
     await db.put('secretKey', b4a.toString(secretKey, 'base64'))
 
-    return { publicKey, secretKey }  } catch (error) {
+    return { publicKey, secretKey }
+  } catch (error) {
     console.error('Error retrieving or generating keys:', error)
   }
 }
 
 async function addPeer(peerPublicKey) {
-  swarm.joinPeer(b4a.from(peerPublicKey, 'base64'));
+  swarm.joinPeer(b4a.from(peerPublicKey, 'base64'))
 }
 
 async function sendUserLocation(locationData) {
   for (const conn of conns) {
-    conn.write(locationData);
+    conn.write(locationData)
   }
 }
 
@@ -133,7 +132,9 @@ async function getMaps(documentsPath) {
   mapSwarm.on('connection', (conn) => {
     store.replicate(conn)
   })
-  const server = new BlobServer(store)
+  const server = new BlobServer(store, {
+    token: false
+  })
   await server.listen()
 
   const filenameOpts = {
@@ -141,7 +142,6 @@ async function getMaps(documentsPath) {
   }
   const link = server.getLink(key, filenameOpts)
   mapLink = link
-  console.log('link', link)
 
   const monitor = server.monitor(key, filenameOpts)
   monitor.on('update', () => {
@@ -150,19 +150,4 @@ async function getMaps(documentsPath) {
 
   const topic = Hypercore.discoveryKey(key)
   mapSwarm.join(topic)
-}
-
-async function getMapLink() {
-  if (mapLink) {
-    const message = {
-      action: 'requestLink',
-      data: {
-        url: mapLink
-      }
-    }
-
-    IPC.write(JSON.stringify(message))
-  } else {
-    console.log('Map link is not ready yet.')
-  }
 }

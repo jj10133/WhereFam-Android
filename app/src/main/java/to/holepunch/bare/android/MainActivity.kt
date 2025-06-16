@@ -1,23 +1,23 @@
 package to.holepunch.bare.android
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import to.holepunch.bare.android.core.home.HomeViewModel
+import to.holepunch.bare.android.core.onboarding.SplashViewModel
 import to.holepunch.bare.android.core.root.ContentView
-import to.holepunch.bare.android.data_access.ipc.IPCMessageConsumer
-import to.holepunch.bare.android.data_access.ipc.IPCProvider
+import to.holepunch.bare.android.data.ipc.IPCMessageConsumer
+import to.holepunch.bare.android.data.ipc.IPCProvider
 import to.holepunch.bare.android.processing.GenericMessageProcessor
 import to.holepunch.bare.kit.IPC
 import to.holepunch.bare.kit.Worklet
-import java.io.File
-import java.io.FileOutputStream
 
 class MainActivity : ComponentActivity() {
 
@@ -26,6 +26,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var messageProcessor: GenericMessageProcessor
     private var ipcMessageConsumer: IPCMessageConsumer? = null
     private val homeViewModel: HomeViewModel by viewModel()
+    private val splashViewModel: SplashViewModel by viewModel()
 
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,12 +49,13 @@ class MainActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch {
-            copyStyleFileToInternalStorage()
             homeViewModel.fetchMaps()
-
             withContext(Dispatchers.Main) {
                 setContent {
-                    ContentView()
+                    val screen by splashViewModel.startDestination
+                    val navController = rememberNavController()
+
+                    ContentView(navController, screen)
                 }
             }
         }
@@ -73,26 +75,5 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         worklet!!.terminate()
         worklet = null
-    }
-
-    private suspend fun copyStyleFileToInternalStorage() {
-        val styleFile = File(filesDir, "style.json")
-
-        if (!styleFile.exists()) {
-            try {
-                assets.open("style.json").use { inputStream ->
-                    FileOutputStream(styleFile).use { outputStream ->
-                        inputStream.copyTo(outputStream)
-                    }
-                }
-                withContext(Dispatchers.Main) {
-                    Log.d("MainActivity", "style.json copied to internal storage")
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Log.e("MainActivity", "Error copying style.json: ${e.message}")
-                }
-            }
-        }
     }
 }

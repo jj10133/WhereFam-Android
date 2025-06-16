@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.maplibre.android.geometry.LatLng
@@ -41,11 +40,7 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel(), locationManager: Lo
     var showDialog by remember { mutableStateOf(false) }
     var dialogInput by remember { mutableStateOf("") }
 
-    var styleUrl by homeViewModel.styleUrl
-
     LaunchedEffect(Unit) {
-        delay(2000)
-        homeViewModel.getMapLink()
         locationManager.getLocation { latitude, longitude ->
             cameraPosition.value = CameraPosition(
                 target = LatLng(latitude, longitude),
@@ -77,18 +72,16 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel(), locationManager: Lo
         floatingActionButtonPosition = FabPosition.End,
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            if (styleUrl.isNotEmpty()) {
-                MapLibre(
-                    modifier = Modifier.fillMaxSize(),
-                    styleBuilder = Style.Builder().fromUri(styleUrl),
-                    cameraPosition = cameraPosition.value,
-                    locationStyling = LocationStyling(
-                        enablePulse = true,
-                        pulseColor = Color.BLUE
-                    ),
-                    renderMode = renderMode.value
-                )
-            }
+            MapLibre(
+                modifier = Modifier.fillMaxSize(),
+                styleBuilder = Style.Builder().fromUri("asset://style.json"),
+                cameraPosition = cameraPosition.value,
+                locationStyling = LocationStyling(
+                    enablePulse = true,
+                    pulseColor = Color.BLUE
+                ),
+                renderMode = renderMode.value
+            )
 
             if (bottomSheetVisible) {
                 ModalBottomSheet(

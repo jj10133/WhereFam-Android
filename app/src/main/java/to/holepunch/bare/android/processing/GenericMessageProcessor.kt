@@ -23,12 +23,6 @@ class GenericMessageProcessor(val homeViewModel: HomeViewModel) : MessageProcess
 
                 }
 
-                "requestLink" -> {
-                    val value = incomingMessage.data?.jsonObject["url"]?.jsonPrimitive?.content
-                    value?.let { homeViewModel.setStyleUrl(it) }
-                        ?: Log.w("GenericProcessor", "Missing 'value' for action 'process_a'")
-                }
-
                 else -> Log.w("GenericProcessor", "Unknown action: ${incomingMessage.action}")
 
             }
