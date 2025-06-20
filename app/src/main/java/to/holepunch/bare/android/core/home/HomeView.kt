@@ -2,20 +2,13 @@ package to.holepunch.bare.android.core.home
 
 import android.content.Intent
 import android.graphics.Color
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.maplibre.android.geometry.LatLng
@@ -24,12 +17,16 @@ import org.maplibre.android.maps.Style
 import org.ramani.compose.CameraPosition
 import org.ramani.compose.LocationStyling
 import org.ramani.compose.MapLibre
+import to.holepunch.bare.android.core.home.people.PeopleView
 import to.holepunch.bare.android.manager.LocationManager
 
 
 @Composable
 @ExperimentalMaterial3Api
-fun HomeView(homeViewModel: HomeViewModel = koinViewModel(), locationManager: LocationManager = koinInject()) {
+fun HomeView(
+    homeViewModel: HomeViewModel = koinViewModel(),
+    locationManager: LocationManager = koinInject()
+) {
 
     val cameraPosition = rememberSaveable { mutableStateOf(CameraPosition(zoom = 14.0)) }
     val renderMode = rememberSaveable { mutableIntStateOf(RenderMode.NORMAL) }
@@ -37,7 +34,6 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel(), locationManager: Lo
     var selectedOption by remember { mutableStateOf<MenuOption?>(null) }
     var bottomSheetVisible by remember { mutableStateOf(false) }
     var shouldShareLink by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) }
     var dialogInput by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -91,18 +87,6 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel(), locationManager: Lo
                             when (selectedOption) {
                                 MenuOption.People -> {
                                     PeopleView()
-
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = "Add",
-                                        modifier = Modifier
-                                            .padding(horizontal = 16.dp)
-                                            .size(30.dp)
-                                            .align(Alignment.TopEnd)
-                                            .clickable {
-                                                showDialog = true
-                                            }
-                                    )
                                 }
 
                                 MenuOption.ShareID -> ShareIDView(homeViewModel)
@@ -112,17 +96,6 @@ fun HomeView(homeViewModel: HomeViewModel = koinViewModel(), locationManager: Lo
                         }
                     },
                     onDismissRequest = { bottomSheetVisible = false }
-                )
-            }
-
-            if (showDialog) {
-                AddPeopleDialog(
-                    onConfirm = {
-                        showDialog = false
-                    },
-                    onDismiss = {
-                        showDialog = false
-                    }
                 )
             }
 
