@@ -95,6 +95,7 @@ fun HomeView(
                             }
                         }
                     },
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     onDismissRequest = { bottomSheetVisible = false }
                 )
             }

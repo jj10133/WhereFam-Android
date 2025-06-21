@@ -1,91 +1,87 @@
-package to.holepunch.bare.android.core.home.people
-
-import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Surface
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntOffset
-import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 
 @Composable
-fun SwipeableItemWithActions(
-    isRevealed: Boolean,
-    actions: @Composable RowScope.() -> Unit,
-    modifier: Modifier = Modifier,
-    onExpanded: () -> Unit = {},
-    onCollapsed: () -> Unit = {},
-    content: @Composable () -> Unit
+fun <T> SwipeToDeleteContainer(
+    item: T,
+    onDelete: (T) -> Unit,
+    animationDuration: Int = 500,
+    content: @Composable (T) -> Unit
 ) {
-    var contextMenuWidth by remember {
-        mutableFloatStateOf(0f)
+    var isRemoved by remember {
+        mutableStateOf(false)
     }
-    val offset = remember {
-        Animatable(initialValue = 0f)
-    }
-    val scope = rememberCoroutineScope()
+    val state = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                isRemoved = true
+                true
+            } else {
+                false
+            }
+        }
+    )
 
-    LaunchedEffect(key1 = isRevealed, contextMenuWidth) {
-        if (isRevealed) {
-            offset.animateTo(contextMenuWidth)
-        } else {
-            offset.animateTo(0f)
+    LaunchedEffect(key1 = isRemoved) {
+        if (isRemoved) {
+            delay(animationDuration.toLong())
+            onDelete(item)
         }
     }
+
+    AnimatedVisibility(
+        visible = !isRemoved,
+        exit = shrinkVertically(
+            animationSpec = tween(durationMillis = animationDuration),
+            shrinkTowards = Alignment.Top
+        ) + fadeOut()
+    ) {
+        SwipeToDismissBox(
+            state = state,
+            backgroundContent = {
+                DeleteBackground(swipeDismissState = state)
+            },
+            content = { content(item) },
+            enableDismissFromEndToStart = true,
+            enableDismissFromStartToEnd = false
+        )
+    }
+}
+
+@Composable
+fun DeleteBackground(
+    swipeDismissState: SwipeToDismissBoxState
+) {
+    val color = if (swipeDismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+        Color.Red
+    } else Color.Transparent
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color)
+            .padding(16.dp),
+        contentAlignment = Alignment.CenterEnd
     ) {
-        Row(
-            modifier = Modifier
-                .onSizeChanged {
-                    contextMenuWidth = it.width.toFloat()
-                },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            actions()
-        }
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .offset { IntOffset(offset.value.roundToInt(), 0) }
-                .pointerInput(contextMenuWidth) {
-                    detectHorizontalDragGestures(
-                        onHorizontalDrag = { _, dragAmount ->
-                            scope.launch {
-                                val newOffset = (offset.value + dragAmount)
-                                    .coerceIn(0f, contextMenuWidth)
-                                offset.snapTo(newOffset)
-                            }
-                        },
-                        onDragEnd = {
-                            when {
-                                offset.value >= contextMenuWidth / 2f -> {
-                                    scope.launch {
-                                        offset.animateTo(contextMenuWidth)
-                                        onExpanded()
-                                    }
-                                }
-
-                                else -> {
-                                    scope.launch {
-                                        offset.animateTo(0f)
-                                        onCollapsed()
-                                    }
-                                }
-                            }
-                        }
-                    )
-                }
-        ) {
-            content()
-        }
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = null,
+            tint = Color.White
+        )
     }
 }
