@@ -90,7 +90,7 @@ fun HomeView(
                                     PeopleView()
                                 }
 
-                                MenuOption.ShareID -> ShareIDView(homeViewModel)
+                                MenuOption.ShareID -> ShareIDView()
                                 MenuOption.ProvideFeedback -> ProvideFeedbackView()
                                 else -> {}
                             }

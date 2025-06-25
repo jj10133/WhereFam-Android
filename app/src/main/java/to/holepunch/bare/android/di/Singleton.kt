@@ -3,6 +3,7 @@ package to.holepunch.bare.android.di
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import to.holepunch.bare.android.core.home.HomeViewModel
+import to.holepunch.bare.android.core.home.ShareViewModel
 import to.holepunch.bare.android.core.home.people.PeopleViewModel
 import to.holepunch.bare.android.core.onboarding.OnboardingViewModel
 import to.holepunch.bare.android.core.onboarding.SplashViewModel
@@ -30,7 +31,8 @@ val viewModel = module {
     viewModel { OnboardingViewModel(get()) }
     viewModel { ThirdPageViewModel(get(), get()) }
 
-    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get()) }
+    viewModel { ShareViewModel(get()) }
     viewModel { PeopleViewModel() }
 
 }

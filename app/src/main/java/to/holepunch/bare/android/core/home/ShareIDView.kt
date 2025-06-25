@@ -23,17 +23,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.koin.androidx.compose.koinViewModel
 import to.holepunch.bare.android.R
 
 @Composable
-fun ShareIDView(homeViewModel: HomeViewModel) {
-    val qrCodeBitmap by homeViewModel.qrCodeBitmap.collectAsState()
-    val publicKey by homeViewModel.publicKey.collectAsState()
+fun ShareIDView(shareViewModel: ShareViewModel = koinViewModel()) {
+    val qrCodeBitmap by shareViewModel.qrCodeBitmap.collectAsState()
+    val publicKey by shareViewModel.publicKey.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         if (publicKey.isEmpty()) {
-            homeViewModel.requestPublicKey()
+            shareViewModel.requestPublicKey()
         }
     }
 
