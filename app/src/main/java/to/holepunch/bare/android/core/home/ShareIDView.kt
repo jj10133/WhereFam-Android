@@ -2,8 +2,6 @@ package to.holepunch.bare.android.core.home
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Color
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,37 +13,27 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.createBitmap
-import androidx.core.graphics.set
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.qrcode.QRCodeWriter
 import to.holepunch.bare.android.R
 
 @Composable
 fun ShareIDView(homeViewModel: HomeViewModel) {
-    var qrCodeBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
-    var publicKey by homeViewModel.publicKey
+    val qrCodeBitmap by homeViewModel.qrCodeBitmap.collectAsState()
+    val publicKey by homeViewModel.publicKey.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         if (publicKey.isEmpty()) {
             homeViewModel.requestPublicKey()
-        }
-    }
-
-    LaunchedEffect(publicKey) {
-        if (publicKey.isNotEmpty()) {
-            qrCodeBitmap = generateQrCode(publicKey)
         }
     }
 
@@ -63,9 +51,7 @@ fun ShareIDView(homeViewModel: HomeViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        qrCodeBitmap?.let {
-            Image(bitmap = it, contentDescription = "Share QR Code")
-        }
+        qrCodeBitmap?.let { Image(bitmap = it, contentDescription = "Share QR Code") }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -146,23 +132,4 @@ fun copyToClipboard(context: Context, publicKey: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
     val clip = android.content.ClipData.newPlainText("Public Key", publicKey)
     clipboard.setPrimaryClip(clip)
-}
-
-
-fun generateQrCode(shareID: String): ImageBitmap {
-    val size = 512
-    val hints = hashMapOf<EncodeHintType, Int>().also {
-        it[EncodeHintType.MARGIN] = 1
-    }
-
-    val bits = QRCodeWriter().encode(shareID, BarcodeFormat.QR_CODE, size, size, hints)
-    val bitmap = createBitmap(size, size, Bitmap.Config.RGB_565).also {
-        for (x in 0 until size) {
-            for (y in 0 until size) {
-                it[x, y] = if (bits[x, y]) Color.BLACK else Color.WHITE
-            }
-        }
-    }
-
-    return bitmap.asImageBitmap()
 }

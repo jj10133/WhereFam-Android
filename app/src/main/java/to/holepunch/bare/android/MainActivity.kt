@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import to.holepunch.bare.android.core.home.HomeViewModel
 import to.holepunch.bare.android.core.onboarding.SplashViewModel
@@ -23,11 +24,10 @@ class MainActivity : ComponentActivity() {
 
     private var worklet: Worklet? = null
     private var ipc: IPC? = null
-    private lateinit var messageProcessor: GenericMessageProcessor
+    private val messageProcessor: GenericMessageProcessor by inject()
     private var ipcMessageConsumer: IPCMessageConsumer? = null
     private val homeViewModel: HomeViewModel by viewModel()
     private val splashViewModel: SplashViewModel by viewModel()
-
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +40,6 @@ class MainActivity : ComponentActivity() {
             ipc = IPC(worklet)
             IPCProvider.ipc = ipc
 
-            messageProcessor = GenericMessageProcessor(homeViewModel)
             ipcMessageConsumer = IPCMessageConsumer(ipc!!, messageProcessor)
             ipcMessageConsumer?.lifecycleScope = lifecycleScope
             ipcMessageConsumer?.startConsuming()
