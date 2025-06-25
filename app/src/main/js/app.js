@@ -1,153 +1,63 @@
-const { IPC } = BareKit
-const Hyperswarm = require('hyperswarm')
-const Hyperbee = require('hyperbee')
-const Hypercore = require('hypercore')
-const Corestore = require('corestore')
-const BlobServer = require('hypercore-blob-server')
-const sodium = require('sodium-native')
-const b4a = require('b4a')
-const EventEmitter = require('bare-events')
+// src/index.js
+const ipc = require('./ipc')
+const hyperbeeManager = require('./hyperbee-manager')
+const hyperswarmManager = require('./hyperswarm-manager')
+const mapManager = require('./map-manager')
 
-let swarm = null
-let db = null
-const conns = []
-let mapLink = null
-const emitter = new EventEmitter()
+console.log('Application starting...')
 
-let ipcBuffer = ''
-IPC.setEncoding('utf8')
-
-IPC.on('data', async (chunck) => {
-  ipcBuffer += chunck
-
-  let newLineIndex
-  while ((newLineIndex = ipcBuffer.indexOf('\n')) !== -1) {
-    const line = ipcBuffer.substring(0, newLineIndex).trim() // Get one line
-    ipcBuffer = ipcBuffer.substring(newLineIndex + 1) // Remove the line from buffer
-
-    if (line.length === 0) {
-      continue // Skip empty lines
-    }
-
-    try {
-      const message = JSON.parse(line)
-      emitter.emit(message.action, message.data)
-    } catch (error) {
-      console.error('Error handling IPC message: ', error)
-    }
+// IPC Event Listeners
+ipc.on('start', async (data) => {
+  const documentsPath = data['path']
+  try {
+    await hyperbeeManager.initializeHyperbee(documentsPath)
+    const keyPair = await hyperbeeManager.getOrCreateKeyPair()
+    await hyperswarmManager.initializeHyperswarm(keyPair)
+  } catch (error) {
+    console.error('Failed to start application:', error)
   }
 })
 
-emitter.on('start', async (data) => await start(data['path']))
-emitter.on('fetchMaps', async (data) => await getMaps(data['path']))
-emitter.on('requestPublicKey', async () => await getPublicKey())
-emitter.on('joinPeer', async (data) => await addPeer(data))
-emitter.on('locationUpdate', async (data) => await sendUserLocation(data))
-
-async function getPublicKey() {
-  const publicKeyBase64 = await db.get('publicKey')
-  const message = {
-    action: 'requestPublicKey',
-    data: {
-      publicKey: publicKeyBase64.value
-    }
-  }
-
-  IPC.write(JSON.stringify(message))
-}
-
-async function start(documentsPath) {
+ipc.on('fetchMaps', async (data) => {
+  const documentsPath = data['path']
+  console.log('Received "fetchMaps" event with path:', documentsPath)
   try {
-    const core = new Hypercore(documentsPath, { valueEncoding: 'json' })
-    db = new Hyperbee(core, { keyEncoding: 'utf-8', valueEncoding: 'json' })
+    await mapManager.getMaps(documentsPath)
+  } catch (error) {
+    console.error('Failed to fetch maps:', error)
+  }
+})
 
-    const { publicKey, secretKey } = await getOrCreateKeys()
-
-    if (!swarm) {
-      swarm = new Hyperswarm({
-        keyPair: { publicKey, secretKey }
-      })
-      swarm.listen()
-      swarm.on('connection', handleConnection)
+ipc.on('requestPublicKey', async () => {
+  try {
+    const publicKey = await hyperbeeManager.getPublicKeyFromDb()
+    if (publicKey) {
+      console.log('Public key --- ' + publicKey)
+      ipc.send('publicKeyResponse', { publicKey: publicKey })
+    } else {
+      console.warn('Public key not found in database.')
     }
   } catch (error) {
-    console.error('Error initializing Hyperswarm:', error)
+    console.error('Error requesting public key:', error)
   }
-}
+})
 
-async function handleConnection(conn) {
-  conns.push(conn)
-  conn.once('close', () => conns.splice(conns.indexOf(conn), 1))
-
-  conn.on('data', (data) => {
-    IPC.write(data)
-  })
-
-  conn.on('error', (e) => console.log(`Connection error: ${e}`))
-}
-
-async function getOrCreateKeys() {
+ipc.on('joinPeer', async (data) => {
+  const peerPublicKey = data['peerPublicKey']
+  console.log('Received "joinPeer" event for:', peerPublicKey)
   try {
-    const publicKeyBase64 = await db.get('publicKey')
-    const secretKeyBase64 = await db.get('secretKey')
-
-    if (publicKeyBase64 && secretKeyBase64) {
-      return {
-        publicKey: b4a.from(publicKeyBase64.value, 'base64'),
-        secretKey: b4a.from(secretKeyBase64.value, 'base64')
-      }
-    }
-
-    const publicKey = b4a.alloc(32) // 32-byte public key
-    const secretKey = b4a.alloc(64) // 64-byte secret key
-    sodium.crypto_sign_keypair(publicKey, secretKey)
-
-    await db.put('publicKey', b4a.toString(publicKey, 'base64'))
-    await db.put('secretKey', b4a.toString(secretKey, 'base64'))
-
-    return { publicKey, secretKey }
+    hyperswarmManager.joinPeer(peerPublicKey)
   } catch (error) {
-    console.error('Error retrieving or generating keys:', error)
+    console.error('Failed to join peer:', error)
   }
-}
+})
 
-async function addPeer(peerPublicKey) {
-  swarm.joinPeer(b4a.from(peerPublicKey, 'base64'))
-}
-
-async function sendUserLocation(locationData) {
-  for (const conn of conns) {
-    conn.write(locationData)
+ipc.on('locationUpdate', async (data) => {
+  console.log('Received "locationUpdate" event.')
+  try {
+    hyperswarmManager.sendUserLocationToPeers(data)
+    ipc.send('locationUpdateSent', { status: 'success' })
+  } catch (error) {
+    console.error('Failed to send user location:', error)
   }
-}
-
-async function getMaps(documentsPath) {
-  const key = b4a.from(
-    '1bfbdb63cf530380fc9ad1a731766d597c3915e32187aeecea36d802bda2c51d',
-    'hex'
-  )
-  const store = new Corestore(documentsPath + '/maps')
-
-  const mapSwarm = new Hyperswarm()
-  mapSwarm.on('connection', (conn) => {
-    store.replicate(conn)
-  })
-  const server = new BlobServer(store, {
-    token: false
-  })
-  await server.listen()
-
-  const filenameOpts = {
-    filename: '/20250512.pmtiles'
-  }
-  const link = server.getLink(key, filenameOpts)
-  mapLink = link
-
-  const monitor = server.monitor(key, filenameOpts)
-  monitor.on('update', () => {
-    console.log('monitor', monitor.stats.downloadStats)
-  })
-
-  const topic = Hypercore.discoveryKey(key)
-  mapSwarm.join(topic)
-}
+})
