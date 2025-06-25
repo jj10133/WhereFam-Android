@@ -4,18 +4,19 @@ import android.util.Log
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import to.holepunch.bare.android.core.home.HomeViewModel
 import to.holepunch.bare.android.data.GenericAction
 
-class GenericMessageProcessor(val homeViewModel: HomeViewModel) : MessageProcessor {
+class GenericMessageProcessor(private val userRepository: UserRepository) : MessageProcessor {
     override fun processMessage(message: String) {
         try {
             val incomingMessage = Json.decodeFromString<GenericAction>(message)
             when (incomingMessage.action) {
 
-                "requestPublicKey" -> {
+                "publicKeyResponse" -> {
                     val publicKey = incomingMessage.data?.jsonObject["publicKey"]?.jsonPrimitive?.content
-                    publicKey?.let { homeViewModel.setPublicKey(it) }
+                    publicKey?.let { key ->
+                        userRepository.updatePublicKey(key)
+                    }
                         ?: Log.w("GenericProcessor", "Missing 'value' for action 'requestPublicKey'")
                 }
 
