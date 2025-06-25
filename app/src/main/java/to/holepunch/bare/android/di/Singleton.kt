@@ -9,7 +9,10 @@ import to.holepunch.bare.android.core.onboarding.SplashViewModel
 import to.holepunch.bare.android.core.onboarding.ThirdPageViewModel
 import to.holepunch.bare.android.data.ipc.IPCProvider
 import to.holepunch.bare.android.data.local.DataStoreRepository
+import to.holepunch.bare.android.data.local.UserRepositoryImpl
 import to.holepunch.bare.android.manager.LocationManager
+import to.holepunch.bare.android.processing.GenericMessageProcessor
+import to.holepunch.bare.android.processing.UserRepository
 
 val appModule = module {
     single { LocationManager(get()) }
@@ -17,6 +20,9 @@ val appModule = module {
     single { IPCProvider.ipc }
 
     single { DataStoreRepository(get()) }
+    single<UserRepository> { UserRepositoryImpl(get()) }
+
+    single { GenericMessageProcessor(get()) }
 }
 
 val viewModel = module {
@@ -24,7 +30,7 @@ val viewModel = module {
     viewModel { OnboardingViewModel(get()) }
     viewModel { ThirdPageViewModel(get(), get()) }
 
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { PeopleViewModel() }
 
 }
