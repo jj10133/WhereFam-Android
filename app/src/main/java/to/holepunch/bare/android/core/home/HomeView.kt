@@ -40,9 +40,10 @@ fun HomeView(
         locationManager.getLocation { latitude, longitude ->
             cameraPosition.value = CameraPosition(
                 target = LatLng(latitude, longitude),
-                zoom = 14.0
+                zoom = 1.0
             )
         }
+        homeViewModel.start()
     }
 
     Scaffold(
