@@ -4,7 +4,8 @@ import android.util.Log
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import to.holepunch.bare.android.data.GenericAction
+import to.holepunch.bare.android.data.UserRepository
+import to.holepunch.bare.android.data.local.GenericAction
 
 class GenericMessageProcessor(private val userRepository: UserRepository) : MessageProcessor {
     override fun processMessage(message: String) {

@@ -1,4 +1,4 @@
-package to.holepunch.bare.android.processing
+package to.holepunch.bare.android.data
 
 import kotlinx.coroutines.flow.StateFlow
 

@@ -18,6 +18,7 @@ import org.ramani.compose.CameraPosition
 import org.ramani.compose.LocationStyling
 import org.ramani.compose.MapLibre
 import to.holepunch.bare.android.core.home.people.PeopleView
+import to.holepunch.bare.android.core.home.share.ShareIDView
 import to.holepunch.bare.android.manager.LocationManager
 
 

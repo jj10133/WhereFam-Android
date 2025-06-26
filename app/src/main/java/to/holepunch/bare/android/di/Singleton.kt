@@ -3,17 +3,17 @@ package to.holepunch.bare.android.di
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import to.holepunch.bare.android.core.home.HomeViewModel
-import to.holepunch.bare.android.core.home.ShareViewModel
 import to.holepunch.bare.android.core.home.people.PeopleViewModel
+import to.holepunch.bare.android.core.home.share.ShareViewModel
 import to.holepunch.bare.android.core.onboarding.OnboardingViewModel
 import to.holepunch.bare.android.core.onboarding.SplashViewModel
 import to.holepunch.bare.android.core.onboarding.ThirdPageViewModel
+import to.holepunch.bare.android.data.UserRepository
 import to.holepunch.bare.android.data.ipc.IPCProvider
+import to.holepunch.bare.android.data.ipc.UserRepositoryImpl
 import to.holepunch.bare.android.data.local.DataStoreRepository
-import to.holepunch.bare.android.data.local.UserRepositoryImpl
 import to.holepunch.bare.android.manager.LocationManager
 import to.holepunch.bare.android.processing.GenericMessageProcessor
-import to.holepunch.bare.android.processing.UserRepository
 
 val appModule = module {
     single { LocationManager(get()) }

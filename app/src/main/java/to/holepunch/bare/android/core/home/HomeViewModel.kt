@@ -8,8 +8,8 @@ import androidx.lifecycle.ViewModel
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import to.holepunch.bare.android.data.GenericAction
 import to.holepunch.bare.android.data.ipc.IPCUtils.writeAsync
+import to.holepunch.bare.android.data.local.GenericAction
 import to.holepunch.bare.kit.IPC
 import java.nio.ByteBuffer
 import java.nio.charset.Charset

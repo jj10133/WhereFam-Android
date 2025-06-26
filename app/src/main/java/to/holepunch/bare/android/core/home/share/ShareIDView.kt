@@ -1,5 +1,7 @@
-package to.holepunch.bare.android.core.home
+package to.holepunch.bare.android.core.home.share
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
@@ -123,14 +125,14 @@ fun CustomToolbar(
 
 fun sharePublicKey(context: Context, publicKey: String) {
     val intent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
+        Intent.setType = "text/plain"
         putExtra(Intent.EXTRA_TEXT, publicKey)
     }
     context.startActivity(Intent.createChooser(intent, "Share Public Key"))
 }
 
 fun copyToClipboard(context: Context, publicKey: String) {
-    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-    val clip = android.content.ClipData.newPlainText("Public Key", publicKey)
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clip = ClipData.newPlainText("Public Key", publicKey)
     clipboard.setPrimaryClip(clip)
 }

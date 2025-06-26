@@ -1,4 +1,4 @@
-package to.holepunch.bare.android.core.home
+package to.holepunch.bare.android.core.home.share
 
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import to.holepunch.bare.android.processing.UserRepository
+import to.holepunch.bare.android.data.UserRepository
 
 class ShareViewModel(private val userRepository: UserRepository) : ViewModel() {
     val publicKey: StateFlow<String> = userRepository.currentPublicKey
