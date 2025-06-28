@@ -14,14 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PeopleView(peopleViewModel: PeopleViewModel = koinViewModel()) {
-    val context = LocalContext.current
     val peopleList by peopleViewModel.peopleList.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
@@ -97,7 +95,7 @@ fun PeopleView(peopleViewModel: PeopleViewModel = koinViewModel()) {
     if (showDialog) {
         AddPeopleDialog(
             onConfirm = { newPersonId ->
-                peopleViewModel.addPerson(person = Person(newPersonId.toInt(), "Test", false))
+                peopleViewModel.addPerson(person = Person(newPersonId, "", false))
                 showDialog = false
             },
             onDismiss = {
