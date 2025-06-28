@@ -17,6 +17,7 @@ import org.maplibre.android.maps.Style
 import org.ramani.compose.CameraPosition
 import org.ramani.compose.LocationStyling
 import org.ramani.compose.MapLibre
+import org.ramani.compose.Symbol
 import to.holepunch.bare.android.core.home.people.PeopleView
 import to.holepunch.bare.android.core.home.share.ShareIDView
 import to.holepunch.bare.android.manager.LocationManager
@@ -36,6 +37,8 @@ fun HomeView(
     var bottomSheetVisible by remember { mutableStateOf(false) }
     var shouldShareLink by remember { mutableStateOf(false) }
     var dialogInput by remember { mutableStateOf("") }
+
+    val locationUpdates by homeViewModel.locationUpdates.collectAsState()
 
     LaunchedEffect(Unit) {
         locationManager.getLocation { latitude, longitude ->
@@ -79,7 +82,14 @@ fun HomeView(
                     pulseColor = Color.BLUE
                 ),
                 renderMode = renderMode.value
-            )
+            ) {
+                locationUpdates.forEach { locationData ->
+                    Symbol(
+                        center = LatLng(locationData.latitude, locationData.longitude),
+                        text = locationData.name,
+                    )
+                }
+            }
 
             if (bottomSheetVisible) {
                 ModalBottomSheet(
