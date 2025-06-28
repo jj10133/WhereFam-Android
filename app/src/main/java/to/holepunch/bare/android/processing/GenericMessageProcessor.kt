@@ -2,8 +2,10 @@ package to.holepunch.bare.android.processing
 
 import android.util.Log
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import to.holepunch.bare.android.data.LocationData
 import to.holepunch.bare.android.data.UserRepository
 import to.holepunch.bare.android.data.local.GenericAction
 
@@ -22,7 +24,7 @@ class GenericMessageProcessor(private val userRepository: UserRepository) : Mess
                 }
 
                 "locationUpdate" -> {
-
+                    handleLocationUpdate(incomingMessage)
                 }
 
                 else -> Log.w("GenericProcessor", "Unknown action: ${incomingMessage.action}")
@@ -32,19 +34,24 @@ class GenericMessageProcessor(private val userRepository: UserRepository) : Mess
             Log.e("GenericProcessor", "Error processing message: ${e.message}")
         }
     }
-}
 
-//private fun handleLocationUpdate(incomingMessage: IncomingMessage) {
-//    val locationData = incomingMessage.data.jsonObject
-//    val id = locationData["id"]?.jsonPrimitive?.content
-//    val name = locationData["name"]?.jsonPrimitive?.content
-//    val latitude = locationData["latitude"]?.jsonPrimitive?.double
-//    val longitude = locationData["longitude"]?.jsonPrimitive?.double
-//
-//    if (id != null && name != null && latitude != null && longitude != null) {
-//        println("Location Update: ID=$id, Name=$name, Latitude=$latitude, Longitude=$longitude")
-//        // Process location update (e.g., save it in the database)
-//    } else {
-//        println("Invalid location update data.")
-//    }
-//}
+    private fun handleLocationUpdate(incomingMessage: GenericAction) {
+        val locationDataJson = incomingMessage.data?.jsonObject
+        if (locationDataJson != null) {
+            val id = locationDataJson["id"]?.jsonPrimitive?.content
+            val name = locationDataJson["name"]?.jsonPrimitive?.content
+            val latitude = locationDataJson["latitude"]?.jsonPrimitive?.double
+            val longitude = locationDataJson["longitude"]?.jsonPrimitive?.double
+
+            if (id != null && name != null && latitude != null && longitude != null) {
+                val locationData = LocationData(id, name, latitude, longitude)
+                userRepository.addLocationUpdate(locationData)
+                Log.d("GenericProcessor", "Location Update Received: $locationData")
+            } else {
+                Log.w("GenericProcessor", "Invalid location update data: Missing required fields.")
+            }
+        } else {
+            Log.w("GenericProcessor", "Location update message has no data.")
+        }
+    }
+}
