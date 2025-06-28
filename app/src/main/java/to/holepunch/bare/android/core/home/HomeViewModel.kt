@@ -1,23 +1,25 @@
 package to.holepunch.bare.android.core.home
 
 import android.content.Context
-import android.location.Location
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import to.holepunch.bare.android.data.LocationData
+import to.holepunch.bare.android.data.UserRepository
 import to.holepunch.bare.android.data.ipc.IPCUtils.writeAsync
 import to.holepunch.bare.android.data.local.GenericAction
 import to.holepunch.bare.kit.IPC
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
-class HomeViewModel(context: Context, private val ipc: IPC) : ViewModel() {
+class HomeViewModel(context: Context, private val ipc: IPC, private val userRepository: UserRepository) : ViewModel() {
     private val fileDir = context.filesDir
 
-    val userLocation: MutableState<Location> = mutableStateOf(Location("gps"))
+//    val userLocation: MutableState<Location> = mutableStateOf(Location("gps"))
+
+    val locationUpdates: StateFlow<List<LocationData>> = userRepository.locationUpdates
 
     suspend fun start() {
         val dynamicData = buildJsonObject { put("path", fileDir.path) }
