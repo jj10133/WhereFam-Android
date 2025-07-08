@@ -125,7 +125,7 @@ fun CustomToolbar(
 
 fun sharePublicKey(context: Context, publicKey: String) {
     val intent = Intent(Intent.ACTION_SEND).apply {
-        Intent.setType = "text/plain"
+        type = "text/plain"
         putExtra(Intent.EXTRA_TEXT, publicKey)
     }
     context.startActivity(Intent.createChooser(intent, "Share Public Key"))
