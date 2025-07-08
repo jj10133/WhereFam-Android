@@ -32,7 +32,6 @@ ipc.on('requestPublicKey', async () => {
   try {
     const publicKey = await hyperbeeManager.getPublicKeyFromDb()
     if (publicKey) {
-      console.log('Public key --- ' + publicKey)
       ipc.send('publicKeyResponse', { publicKey: publicKey })
     } else {
       console.warn('Public key not found in database.')
@@ -56,7 +55,6 @@ ipc.on('locationUpdate', async (data) => {
   console.log('Received "locationUpdate" event.')
   try {
     hyperswarmManager.sendUserLocationToPeers(data)
-    ipc.send('locationUpdateSent', { status: 'success' })
   } catch (error) {
     console.error('Failed to send user location:', error)
   }
