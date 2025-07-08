@@ -1,5 +1,9 @@
 package to.holepunch.bare.android
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +20,7 @@ import to.holepunch.bare.android.core.onboarding.SplashViewModel
 import to.holepunch.bare.android.core.root.ContentView
 import to.holepunch.bare.android.data.ipc.IPCMessageConsumer
 import to.holepunch.bare.android.data.ipc.IPCProvider
+import to.holepunch.bare.android.manager.LocationTrackerService
 import to.holepunch.bare.android.processing.GenericMessageProcessor
 import to.holepunch.bare.kit.IPC
 import to.holepunch.bare.kit.Worklet
@@ -47,6 +52,15 @@ class MainActivity : ComponentActivity() {
             throw RuntimeException(e)
         }
 
+        val channel = NotificationChannel(
+            LocationTrackerService.LOCATION_CHANNEL,
+            "Location",
+            NotificationManager.IMPORTANCE_LOW
+        )
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+
         lifecycleScope.launch {
             homeViewModel.fetchMaps()
             withContext(Dispatchers.Main) {
@@ -74,5 +88,9 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         worklet!!.terminate()
         worklet = null
+        Intent(applicationContext, LocationTrackerService::class.java).apply {
+            action = LocationTrackerService.Action.STOP.name
+            startService(this)
+        }
     }
 }

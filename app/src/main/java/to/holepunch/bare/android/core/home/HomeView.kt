@@ -21,6 +21,7 @@ import org.ramani.compose.Symbol
 import to.holepunch.bare.android.core.home.people.PeopleView
 import to.holepunch.bare.android.core.home.share.ShareIDView
 import to.holepunch.bare.android.manager.LocationManager
+import to.holepunch.bare.android.manager.LocationTrackerService
 
 
 @Composable
@@ -29,6 +30,7 @@ fun HomeView(
     homeViewModel: HomeViewModel = koinViewModel(),
     locationManager: LocationManager = koinInject()
 ) {
+    val context = LocalContext.current
 
     val cameraPosition = rememberSaveable { mutableStateOf(CameraPosition(zoom = 14.0)) }
     val renderMode = rememberSaveable { mutableIntStateOf(RenderMode.NORMAL) }
@@ -49,6 +51,15 @@ fun HomeView(
         }
         homeViewModel.start()
     }
+
+    LaunchedEffect(Unit) {
+        val intent = Intent(context, LocationTrackerService::class.java).apply {
+            action = LocationTrackerService.Action.START.name
+        }
+        context.startService(intent)
+    }
+
+
 
     Scaffold(
         floatingActionButton = {

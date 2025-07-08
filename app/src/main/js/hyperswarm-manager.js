@@ -38,11 +38,10 @@ function handleConnection(conn) {
   })
 
   conn.on('data', (data) => {
-    // Assuming 'data' from other peers is a location update
     try {
       const message = JSON.parse(data.toString())
       if (message.action === 'locationUpdate' && message.data) {
-        ipc.send('peerLocationUpdate', message.data) // Send peer's location via IPC
+        ipc.send('locationUpdate', message.data)
       } else {
         console.log('Received unknown data from peer:', data.toString())
       }
