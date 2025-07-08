@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import to.holepunch.bare.android.data.LocationData
 import to.holepunch.bare.android.data.UserRepository
 import to.holepunch.bare.android.data.ipc.IPCUtils.writeAsync
@@ -29,6 +30,17 @@ class UserRepositoryImpl(private val ipc: IPC) : UserRepository {
         val byteBuffer = ByteBuffer.wrap(jsonString.toByteArray(Charset.forName("UTF-8")))
         ipc.writeAsync(byteBuffer)
     }
+
+    override suspend fun joinPeer(key: String) {
+        val dynamicData = buildJsonObject {
+            put("peerPublicKey", key)
+        }
+        val message = GenericAction(action = "joinPeer", data = dynamicData)
+        val jsonString = Json.Default.encodeToString(message) + "\n"
+        val byteBuffer = ByteBuffer.wrap(jsonString.toByteArray(Charset.forName("UTF-8")))
+        ipc.writeAsync(byteBuffer)
+    }
+
 
     override fun updatePublicKey(key: String) {
         _currentPublicKey.value = key

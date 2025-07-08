@@ -10,6 +10,7 @@ interface UserRepository {
     val locationUpdates: StateFlow<List<LocationData>>
 
     suspend fun requestPublicKey()
+    suspend fun joinPeer(key: String)
 
     fun updatePublicKey(key: String)
 
