@@ -10,6 +10,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -64,5 +65,9 @@ class DataStoreRepository(private val context: Context) {
                 val onBoardingState = preferences[ONBOARDING_COMPLETED] ?: false
                 onBoardingState
             }
+    }
+
+    suspend fun getUserName(): String {
+        return context.userPreferencesDataStore.data.first()[USER_NAME] ?: ""
     }
 }
