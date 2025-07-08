@@ -49,4 +49,9 @@ class PeopleViewModel(private val userRepository: UserRepository) : ViewModel() 
     fun removePerson(id: String) {
         _peopleList.update { currentList -> currentList.filterNot { it.id == id } }
     }
+
+    suspend fun joinPeer(key: String) {
+        userRepository.joinPeer(key)
+    }
+
 }

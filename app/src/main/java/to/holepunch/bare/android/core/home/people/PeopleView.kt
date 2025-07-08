@@ -16,12 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PeopleView(peopleViewModel: PeopleViewModel = koinViewModel()) {
     val peopleList by peopleViewModel.peopleList.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
 
     Column(
         modifier = Modifier
@@ -96,6 +99,9 @@ fun PeopleView(peopleViewModel: PeopleViewModel = koinViewModel()) {
         AddPeopleDialog(
             onConfirm = { newPersonId ->
                 peopleViewModel.addPerson(person = Person(newPersonId, "", false))
+                coroutineScope.launch {
+                    peopleViewModel.joinPeer(newPersonId)
+                }
                 showDialog = false
             },
             onDismiss = {

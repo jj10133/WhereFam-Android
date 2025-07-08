@@ -31,8 +31,8 @@ val viewModel = module {
     viewModel { OnboardingViewModel(get()) }
     viewModel { ThirdPageViewModel(get(), get()) }
 
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { ShareViewModel(get()) }
-    viewModel { PeopleViewModel() }
+    viewModel { PeopleViewModel(get()) }
 
 }
