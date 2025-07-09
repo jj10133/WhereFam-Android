@@ -76,7 +76,7 @@ class LocationTrackerService : Service() {
         } else {
             val dynamicData = buildJsonObject {
                 put("id", userRepository.currentPublicKey.value)
-                put("user", dataStoreRepository.getUserName())
+                put("name", dataStoreRepository.getUserName())
                 put("latitude", latitude)
                 put("longitude", longitude)
             }
