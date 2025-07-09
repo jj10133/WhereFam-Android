@@ -11,27 +11,30 @@ import to.holepunch.bare.android.data.local.GenericAction
 
 class GenericMessageProcessor(private val userRepository: UserRepository) : MessageProcessor {
     override fun processMessage(message: String) {
-        try {
-            val incomingMessage = Json.decodeFromString<GenericAction>(message)
-            when (incomingMessage.action) {
+        val individualMessage = message.split("\n").filter { it.isNotBlank() }
+        for (msg in individualMessage) {
+            try {
+                val incomingMessage = Json.decodeFromString<GenericAction>(msg)
+                when (incomingMessage.action) {
 
-                "publicKeyResponse" -> {
-                    val publicKey = incomingMessage.data?.jsonObject["publicKey"]?.jsonPrimitive?.content
-                    publicKey?.let { key ->
-                        userRepository.updatePublicKey(key)
+                    "publicKeyResponse" -> {
+                        val publicKey = incomingMessage.data?.jsonObject["publicKey"]?.jsonPrimitive?.content
+                        publicKey?.let { key ->
+                            userRepository.updatePublicKey(key)
+                        }
+                            ?: Log.w("GenericProcessor", "Missing 'value' for action 'requestPublicKey'")
                     }
-                        ?: Log.w("GenericProcessor", "Missing 'value' for action 'requestPublicKey'")
+
+                    "locationUpdate" -> {
+                        handleLocationUpdate(incomingMessage)
+                    }
+
+                    else -> Log.w("GenericProcessor", "Unknown action: ${incomingMessage.action}")
+
                 }
-
-                "locationUpdate" -> {
-                    handleLocationUpdate(incomingMessage)
-                }
-
-                else -> Log.w("GenericProcessor", "Unknown action: ${incomingMessage.action}")
-
+            } catch (e: Exception) {
+                Log.e("GenericProcessor", "Error processing message: ${e.message}")
             }
-        } catch (e: Exception) {
-            Log.e("GenericProcessor", "Error processing message: ${e.message}")
         }
     }
 
