@@ -82,4 +82,5 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose-navigation:4.0.3")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("androidx.room:room-runtime:2.7.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.1")
 }
