@@ -1,8 +1,13 @@
 package to.holepunch.bare.android.data.ipc
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
@@ -20,8 +25,14 @@ class UserRepositoryImpl(private val ipc: IPC) : UserRepository {
     private val _currentPublicKey = MutableStateFlow("")
     override val currentPublicKey: StateFlow<String> = _currentPublicKey.asStateFlow()
 
-    private val _locationUpdates = MutableStateFlow<List<LocationData>>(emptyList())
-    override val locationUpdates: StateFlow<List<LocationData>> = _locationUpdates.asStateFlow()
+    private val _locationUpdatesMap = MutableStateFlow<Map<String, LocationData>>(emptyMap())
+    override val locationUpdates: StateFlow<List<LocationData>> = _locationUpdatesMap
+        .map { it.values.toList() }
+        .stateIn(
+            scope = CoroutineScope(Dispatchers.Default),
+            started = SharingStarted.Lazily,
+            initialValue = emptyList()
+        )
 
     override suspend fun requestPublicKey() {
         val dynamicData = buildJsonObject {}
@@ -47,6 +58,8 @@ class UserRepositoryImpl(private val ipc: IPC) : UserRepository {
     }
 
     override fun addLocationUpdate(location: LocationData) {
-        _locationUpdates.update { _locationUpdates.value + location }
+       _locationUpdatesMap.update { currentMap ->
+           currentMap + (location.id to location)
+       }
     }
 }
