@@ -11,7 +11,7 @@ class OnboardingViewModel(
 ) : ViewModel() {
 
     fun saveOnboardingState(completed: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main) {
             dataStoreRepository.saveOnboardingState(completed)
         }
     }
