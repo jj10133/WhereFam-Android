@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.maplibre.android.geometry.LatLng
@@ -40,7 +41,7 @@ fun HomeView(
     var shouldShareLink by remember { mutableStateOf(false) }
     var dialogInput by remember { mutableStateOf("") }
 
-    val locationUpdates by homeViewModel.locationUpdates.collectAsState()
+    val locationUpdates by homeViewModel.locationUpdates.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         locationManager.getLocation { latitude, longitude ->
@@ -83,22 +84,28 @@ fun HomeView(
         },
         floatingActionButtonPosition = FabPosition.End,
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            MapLibre(
+        Box {
+            Surface(
                 modifier = Modifier.fillMaxSize(),
-                styleBuilder = Style.Builder().fromUri("asset://style.json"),
-                cameraPosition = cameraPosition.value,
-                locationStyling = LocationStyling(
-                    enablePulse = true,
-                    pulseColor = Color.BLUE
-                ),
-                renderMode = renderMode.value
+                color = MaterialTheme.colorScheme.background
             ) {
-                locationUpdates.forEach { locationData ->
-                    Symbol(
-                        center = LatLng(locationData.latitude, locationData.longitude),
-                        text = locationData.name,
-                    )
+                MapLibre(
+                    modifier = Modifier.fillMaxSize(),
+                    styleBuilder = Style.Builder().fromUri("asset://style.json"),
+                    cameraPosition = cameraPosition.value,
+                    locationStyling = LocationStyling(
+                        enablePulse = true,
+                        pulseColor = Color.BLUE
+                    ),
+                    renderMode = renderMode.value
+                ) {
+                    locationUpdates.forEach { locationData ->
+                        Symbol(
+                            center = LatLng(locationData.latitude, locationData.longitude),
+                            text = locationData.name,
+                            imageId = android.R.drawable.ic_menu_view
+                        )
+                    }
                 }
             }
 
