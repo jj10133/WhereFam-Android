@@ -2,23 +2,18 @@
 const Hypercore = require('hypercore')
 const Corestore = require('corestore')
 const BlobServer = require('hypercore-blob-server')
-const Hyperswarm = require('hyperswarm')
 const b4a = require('b4a')
 const { PMTILES_KEY } = require('./constants')
-
-let mapSwarm = null
+const hyperswarmManager = require('./hyperswarm-manager')
 
 async function getMaps(documentsPath) {
   try {
     const key = b4a.from(PMTILES_KEY, 'hex')
     const store = new Corestore(documentsPath + '/maps')
 
-    if (!mapSwarm) {
-      mapSwarm = new Hyperswarm()
-      mapSwarm.on('connection', (conn) => {
-        store.replicate(conn)
-      })
-    }
+    hyperswarmManager.registerProtocol('hypercore-replication', (mux) => {
+      store.replicate(mux)
+    })
 
     const server = new BlobServer(store, {
       token: false
