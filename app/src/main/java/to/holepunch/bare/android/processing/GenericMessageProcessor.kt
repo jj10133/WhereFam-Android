@@ -5,12 +5,14 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import to.holepunch.bare.android.data.LocationData
+import to.holepunch.bare.android.data.PeerRepository
 import to.holepunch.bare.android.data.UserRepository
 import to.holepunch.bare.android.data.local.GenericAction
+import to.holepunch.bare.android.data.local.Peer
 
-class GenericMessageProcessor(private val userRepository: UserRepository) : MessageProcessor {
-    override fun processMessage(message: String) {
+class GenericMessageProcessor(private val userRepository: UserRepository, private val peerRepository: PeerRepository) :
+    MessageProcessor {
+    override suspend fun processMessage(message: String) {
         val individualMessage = message.split("\n").filter { it.isNotBlank() }
         for (msg in individualMessage) {
             try {
@@ -38,7 +40,7 @@ class GenericMessageProcessor(private val userRepository: UserRepository) : Mess
         }
     }
 
-    private fun handleLocationUpdate(incomingMessage: GenericAction) {
+    private suspend fun handleLocationUpdate(incomingMessage: GenericAction) {
         val locationDataJson = incomingMessage.data?.jsonObject
         if (locationDataJson != null) {
             val id = locationDataJson["id"]?.jsonPrimitive?.content
@@ -47,9 +49,7 @@ class GenericMessageProcessor(private val userRepository: UserRepository) : Mess
             val longitude = locationDataJson["longitude"]?.jsonPrimitive?.double
 
             if (id != null && name != null && latitude != null && longitude != null) {
-                val locationData = LocationData(id, name, latitude, longitude)
-                userRepository.addLocationUpdate(locationData)
-                Log.d("GenericProcessor", "Location Update Received: $locationData")
+                peerRepository.upsert(Peer(id, name, latitude, longitude))
             } else {
                 Log.w("GenericProcessor", "Invalid location update data: Missing required fields.")
             }
