@@ -1,10 +1,13 @@
 // src/hyperswarm-manager.js
 const Hyperswarm = require('hyperswarm')
 const b4a = require('b4a')
-const ipc = require('./ipc') // We need to send IPC messages from here
+const ipc = require('./ipc')
+const Protomux = require('protomux')
 
 let swarm = null
-const activeConnections = [] // Renamed from 'conns' for clarity
+let activeConnections = []
+const protocolHandlers = new Map()
+let tempLeaveCache = new Set()
 
 async function initializeHyperswarm(keyPair) {
   if (swarm) {
@@ -25,29 +28,27 @@ async function initializeHyperswarm(keyPair) {
   }
 }
 
-function handleConnection(conn) {
-  activeConnections.push(conn)
+function handleConnection(conn, info) {
+  const peerPublicKey = b4a.toString(info.publicKey, 'base64')
   console.log('New connection established.')
 
-  conn.once('close', () => {
-    activeConnections.splice(activeConnections.indexOf(conn), 1)
-    console.log(
-      'Connection closed. Remaining connections:',
-      activeConnections.length
-    )
-  })
+  if (tempLeaveCache.has(peerPublicKey)) {
+    conn.destroy()
+    return
+  }
 
-  conn.on('data', (data) => {
-    try {
-      const message = JSON.parse(data.toString())
-      if (message.action === 'locationUpdate' && message.data) {
-        ipc.send('locationUpdate', message.data)
-      } else {
-        console.log('Received unknown data from peer:', data.toString())
-      }
-    } catch (e) {
-      console.error('Error parsing data from peer:', e)
-    }
+  const mux = new Protomux(conn)
+  activeConnections.push({ mux, publicKey: peerPublicKey })
+
+  for (const handler of protocolHandlers.values()) {
+    handler(mux, peerPublicKey)
+  }
+
+  conn.once('close', () => {
+    activeConnections = activeConnections.filter((m) => m !== mux)
+    ipc.send('peerDisconnected', { peerKey: peerPublicKey })
+    closeConnection(peerPublicKey)
+    tempLeaveCache.add(peerPublicKey)
   })
 
   conn.on('error', (e) => console.log(`Connection error: ${e}`))
@@ -66,20 +67,49 @@ function joinPeer(peerPublicKey) {
   }
 }
 
-function sendUserLocationToPeers(locationData) {
-  const message = {
-    action: 'locationUpdate',
-    data: locationData
-  }
-  const buffer = b4a.from(JSON.stringify(message))
-  for (const conn of activeConnections) {
-    conn.write(buffer)
-  }
-  console.log('Sent user location to peers.')
+function registerProtocol(protocolName, handler) {
+  protocolHandlers.set(protocolName, handler)
 }
+
+async function closeConnection(peerPublicKey) {
+  const connectionIndex = activeConnections.findIndex(
+    (c) => c.publicKey === peerPublicKey
+  )
+  if (connectionIndex !== -1) {
+    const connection = connections[connectionIndex]
+    connection.mux.stream.destroy()
+  } else {
+    console.log(`No active connection found for peer: ${peerPublicKey}`)
+  }
+}
+
+function leavePeer(peerPublicKey) {
+  if (!swarm) {
+    console.error('Hyperswarm not initialized. Cannot join peer.')
+    return
+  }
+  try {
+    tempLeaveCache.add(peerPublicKey)
+    swarm.leavePeer(b4a.from(peerPublicKey, 'base64'))
+  } catch (error) {
+    console.error('Error leaving peer:', error)
+  }
+}
+
+function getSwarm() {
+  if (!swarm) {
+    throw new Error('Hyperswarm is not initialized yet.')
+  }
+  return swarm
+}
+
 
 module.exports = {
   initializeHyperswarm,
   joinPeer,
-  sendUserLocationToPeers
+  leavePeer,
+  getSwarm,
+  registerProtocol,
+  activeConnections,
+  closeConnection
 }
