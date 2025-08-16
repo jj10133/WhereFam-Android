@@ -143,7 +143,7 @@ fun ReferView() {
     val context = LocalContext.current
     val shareIntent = Intent().apply {
         action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, "Check out this URL: https://www.example.com")
+        putExtra(Intent.EXTRA_TEXT, "Check out: https://www.wherefam.com")
         type = "text/plain"
     }
     context.startActivity(Intent.createChooser(shareIntent, "Share URL"))
