@@ -30,14 +30,4 @@ class HomeViewModel(context: Context, private val ipc: IPC, private val userRepo
         val byteBuffer = ByteBuffer.wrap(jsonString.toByteArray(Charset.forName("UTF-8")))
         ipc.writeAsync(byteBuffer)
     }
-
-    suspend fun fetchMaps() {
-        val dynamicData = buildJsonObject { put("path", fileDir.path) }
-        val message = GenericAction(action = "fetchMaps", data = dynamicData)
-
-        val jsonString = Json.encodeToString(message) + "\n"
-
-        val byteBuffer = ByteBuffer.wrap(jsonString.toByteArray(Charset.forName("UTF-8")))
-        ipc.writeAsync(byteBuffer)
-    }
 }

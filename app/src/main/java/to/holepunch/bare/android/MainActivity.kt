@@ -62,7 +62,6 @@ class MainActivity : ComponentActivity() {
         notificationManager.createNotificationChannel(channel)
 
         lifecycleScope.launch {
-            homeViewModel.fetchMaps()
             withContext(Dispatchers.Main) {
                 setContent {
                     val screen by splashViewModel.startDestination
