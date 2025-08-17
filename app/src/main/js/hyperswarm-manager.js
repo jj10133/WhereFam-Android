@@ -76,7 +76,7 @@ async function closeConnection(peerPublicKey) {
     (c) => c.publicKey === peerPublicKey
   )
   if (connectionIndex !== -1) {
-    const connection = connections[connectionIndex]
+    const connection = activeConnections[connectionIndex]
     connection.mux.stream.destroy()
   } else {
     console.log(`No active connection found for peer: ${peerPublicKey}`)
