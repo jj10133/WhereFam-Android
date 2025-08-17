@@ -3,6 +3,7 @@ plugins {
     id "org.jetbrains.kotlin.android"
     id "org.jetbrains.kotlin.plugin.compose"
     id "org.jetbrains.kotlin.plugin.serialization"
+    id "com.google.devtools.ksp"
 }
 
 android {
@@ -82,6 +83,7 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose-navigation:4.0.3")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("androidx.room:room-runtime:2.7.2")
+    ksp("androidx.room:room-compiler:2.7.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.1")
     implementation("com.revenuecat.purchases:purchases:9.1.0")
     implementation("com.revenuecat.purchases:purchases-ui:9.1.0")
