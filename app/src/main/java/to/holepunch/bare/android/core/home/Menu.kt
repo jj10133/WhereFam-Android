@@ -6,33 +6,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import to.holepunch.bare.android.R
 
 enum class MenuOption {
-    People, ShareID, ProvideFeedback
+    People, ShareID
 }
 
 @Composable
 fun Menu(
     onPeopleSelected: () -> Unit,
     onShareIDSelected: () -> Unit,
-    onProvideFeedbackSelected: () -> Unit,
-    onReferFriendSelected: () -> Unit
+    onReferFriendSelected: () -> Unit,
+    onRateAppSelected: () -> Unit,
+    onSupportAppSelected: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -81,20 +72,6 @@ fun Menu(
             )
 
             DropdownMenuItem(
-                text = { Text("Provide Feedback") },
-                onClick = {
-                    expanded = false
-                    onProvideFeedbackSelected()
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.material_symbols_outlined_feedback),
-                        contentDescription = null
-                    )
-                }
-            )
-
-            DropdownMenuItem(
                 text = {
                     Text("Refer to friend")
                 },
@@ -104,6 +81,34 @@ fun Menu(
                 },
                 leadingIcon = {
                     Icon(imageVector = Icons.Default.Share, contentDescription = null)
+                }
+            )
+
+            DropdownMenuItem(
+                text = { Text("Rate App") },
+                onClick = {
+                    expanded = false
+                    onRateAppSelected()
+                },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.outline_rate_review_24),
+                        contentDescription = null
+                    )
+                }
+            )
+
+            DropdownMenuItem(
+                text = { Text("Support App") },
+                onClick = {
+                    expanded = false
+                    onSupportAppSelected()
+                },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.outline_wand_stars_24),
+                        contentDescription = null
+                    )
                 }
             )
         }
