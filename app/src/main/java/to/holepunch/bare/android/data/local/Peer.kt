@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class Peer(
     @PrimaryKey
     val id: String,
-    val name: String,
-    val latitude: Double,
-    val longitude: Double
+    val name: String?,
+    val latitude: Double?,
+    val longitude: Double?
 )
