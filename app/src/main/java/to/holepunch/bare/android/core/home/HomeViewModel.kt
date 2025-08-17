@@ -2,24 +2,37 @@ package to.holepunch.bare.android.core.home
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import to.holepunch.bare.android.data.LocationData
-import to.holepunch.bare.android.data.UserRepository
+import to.holepunch.bare.android.data.PeerRepository
 import to.holepunch.bare.android.data.ipc.IPCUtils.writeAsync
 import to.holepunch.bare.android.data.local.GenericAction
+import to.holepunch.bare.android.data.local.Peer
 import to.holepunch.bare.kit.IPC
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
-class HomeViewModel(context: Context, private val ipc: IPC, private val userRepository: UserRepository) : ViewModel() {
+class HomeViewModel(
+    context: Context,
+    private val ipc: IPC,
+    private val peerRepository: PeerRepository
+) : ViewModel() {
     private val fileDir = context.filesDir
 
 //    val userLocation: MutableState<Location> = mutableStateOf(Location("gps"))
 
-    val locationUpdates: StateFlow<List<LocationData>> = userRepository.locationUpdates
+    val peers: StateFlow<List<Peer>> = peerRepository.getAllPeers()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
 
     suspend fun start() {
         val dynamicData = buildJsonObject { put("path", fileDir.path) }

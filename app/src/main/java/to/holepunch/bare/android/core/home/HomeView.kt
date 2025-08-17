@@ -2,6 +2,7 @@ package to.holepunch.bare.android.core.home
 
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
@@ -9,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.maplibre.android.geometry.LatLng
@@ -39,9 +39,10 @@ fun HomeView(
     var selectedOption by remember { mutableStateOf<MenuOption?>(null) }
     var bottomSheetVisible by remember { mutableStateOf(false) }
     var shouldShareLink by remember { mutableStateOf(false) }
+    var shouldRateApp by remember { mutableStateOf(false) }
     var dialogInput by remember { mutableStateOf("") }
 
-    val locationUpdates by homeViewModel.locationUpdates.collectAsStateWithLifecycle()
+    val peers by homeViewModel.peers.collectAsState()
 
     LaunchedEffect(Unit) {
         locationManager.getLocation { latitude, longitude ->
@@ -73,12 +74,14 @@ fun HomeView(
                     selectedOption = MenuOption.ShareID
                     bottomSheetVisible = true
                 },
-                onProvideFeedbackSelected = {
-                    selectedOption = MenuOption.ProvideFeedback
-                    bottomSheetVisible = true
-                },
                 onReferFriendSelected = {
                     shouldShareLink = true
+                },
+                onRateAppSelected = {
+                    shouldRateApp = true
+                },
+                onSupportAppSelected = {
+
                 }
             )
         },
@@ -99,12 +102,14 @@ fun HomeView(
                     ),
                     renderMode = renderMode.value
                 ) {
-                    locationUpdates.forEach { locationData ->
-                        Symbol(
-                            center = LatLng(locationData.latitude, locationData.longitude),
-                            text = locationData.name,
-                            imageId = android.R.drawable.ic_menu_view
-                        )
+                    peers.forEach { peer ->
+                        if (peer.latitude != null && peer.longitude != null) {
+                            Symbol(
+                                center = LatLng(peer.latitude, peer.longitude),
+                                text = peer.name,
+                                imageId = android.R.drawable.ic_menu_mylocation
+                            )
+                        }
                     }
                 }
             }
@@ -120,7 +125,6 @@ fun HomeView(
                                 }
 
                                 MenuOption.ShareID -> ShareIDView()
-                                MenuOption.ProvideFeedback -> ProvideFeedbackView()
                                 else -> {}
                             }
                         }
@@ -133,6 +137,11 @@ fun HomeView(
             if (shouldShareLink) {
                 ReferView()
                 shouldShareLink = false
+            }
+
+            if (shouldRateApp) {
+                RateView()
+                shouldRateApp = false
             }
         }
     }
@@ -147,6 +156,15 @@ fun ReferView() {
         type = "text/plain"
     }
     context.startActivity(Intent.createChooser(shareIntent, "Share URL"))
+}
+
+@Composable
+fun RateView() {
+    val context = LocalContext.current
+    val appPackageName = context.packageName
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName"))
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
 }
 
 
