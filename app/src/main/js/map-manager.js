@@ -4,15 +4,16 @@ const Corestore = require('corestore')
 const BlobServer = require('hypercore-blob-server')
 const b4a = require('b4a')
 const { PMTILES_KEY } = require('./constants')
-const hyperswarmManager = require('./hyperswarm-manager')
+const Hyperswarm = require('hyperswarm')
 
 async function getMaps(documentsPath) {
   try {
     const key = b4a.from(PMTILES_KEY, 'hex')
     const store = new Corestore(documentsPath + '/maps')
 
-    hyperswarmManager.registerProtocol('hypercore-replication', (mux) => {
-      store.replicate(mux)
+    const swarm = new Hyperswarm()
+    swarm.on('connection', (conn) => {
+      store.replicate(conn)
     })
 
     const server = new BlobServer(store, {
@@ -26,7 +27,6 @@ async function getMaps(documentsPath) {
     }
 
     const topic = Hypercore.discoveryKey(key)
-    const swarm = hyperswarmManager.getSwarm()
     swarm.join(topic)
   } catch (error) {
     console.error('Error getting maps:', error)
