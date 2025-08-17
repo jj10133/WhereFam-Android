@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import to.holepunch.bare.android.data.local.Peer
 
 @Composable
 fun PeopleView(peopleViewModel: PeopleViewModel = koinViewModel()) {
@@ -98,7 +99,7 @@ fun PeopleView(peopleViewModel: PeopleViewModel = koinViewModel()) {
     if (showDialog) {
         AddPeopleDialog(
             onConfirm = { newPersonId ->
-                peopleViewModel.addPerson(person = Person(newPersonId, "", false))
+                peopleViewModel.addPerson(Peer(newPersonId, null, null, null))
                 coroutineScope.launch {
                     peopleViewModel.joinPeer(newPersonId)
                 }
