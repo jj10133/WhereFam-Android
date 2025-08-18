@@ -95,7 +95,8 @@ fun HomeView(
             ) {
                 MapLibre(
                     modifier = Modifier.fillMaxSize(),
-                    styleBuilder = Style.Builder().fromUri("asset://style.json"),
+//                    asset://style.json
+                    styleBuilder = Style.Builder().fromUri("https://tiles.openfreemap.org/styles/liberty"),
                     cameraPosition = cameraPosition.value,
                     locationStyling = LocationStyling(
                         enablePulse = true,
@@ -107,6 +108,7 @@ fun HomeView(
                         if (peer.latitude != null && peer.longitude != null) {
                             Symbol(
                                 center = LatLng(peer.latitude, peer.longitude),
+                                size = 5F,
                                 text = peer.name,
                                 imageId = R.drawable.ic_menu_mylocation
                             )
