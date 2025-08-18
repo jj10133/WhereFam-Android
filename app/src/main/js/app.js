@@ -14,7 +14,7 @@ ipc.on('start', async (data) => {
     await hyperbeeManager.initializeHyperbee(documentsPath)
     const keyPair = await hyperbeeManager.getOrCreateKeyPair()
     await hyperswarmManager.initializeHyperswarm(keyPair)
-    await mapManager.getMaps(documentsPath)
+    // await mapManager.getMaps(documentsPath)
     locationManager.setupLocationProtocol()
     console.log('All managers initialized and protocols registered.')
   } catch (error) {
