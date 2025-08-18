@@ -1,11 +1,11 @@
 package com.wherefam.android.manager
 
-import android.R
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.wherefam.android.R
 import com.wherefam.android.data.UserRepository
 import com.wherefam.android.data.ipc.IPCUtils.writeAsync
 import com.wherefam.android.data.local.DataStoreRepository
@@ -47,7 +47,7 @@ class LocationTrackerService : Service() {
 
         val notification = NotificationCompat
             .Builder(this, LOCATION_CHANNEL)
-            .setSmallIcon(R.drawable.gallery_thumb)
+            .setSmallIcon(R.drawable.baseline_location_on_24)
             .setContentTitle("Background Location")
 
         startForeground(1, notification.build())
